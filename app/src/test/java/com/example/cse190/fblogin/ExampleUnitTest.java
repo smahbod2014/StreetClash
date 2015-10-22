@@ -1,4 +1,4 @@
-package com.cse190sc.streetclash;
+package com.example.cse190.fblogin;
 
 import org.junit.Test;
 
