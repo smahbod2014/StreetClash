@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:id="@+id/imageButton5"
+            android:cropToPadding="false"
+            android:layout_weight="1"
+            android:layout_marginLeft="8dp"/>
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:id="@+id/imageButton6"
+            android:layout_weight="1"
+            android:layout_marginLeft="-8dp"/>
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:id="@+id/imageButton7"
+            android:layout_marginLeft="-8dp"/>
+    </LinearLayout>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnCount="3"
+        android:rowCount="1"
+
+        >
+
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:id="@+id/imageButton2"/>
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:id="@+id/imageButton3"
+            android:layout_marginLeft="-8dp"/>
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:id="@+id/imageButton4"/>
+
+    </GridLayout>
+
+</LinearLayout>
