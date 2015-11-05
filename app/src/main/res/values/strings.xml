@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">StreetClash</string>
+    <string-array name="gender_array">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+        <item>Unspecified</item>
+    </string-array>
 </resources>
