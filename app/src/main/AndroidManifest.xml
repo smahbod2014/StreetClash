@@ -11,9 +11,13 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
+<<<<<<< HEAD
         <activity
             android:name=".ProfileActivity"
             android:label="@string/title_activity_profile" >
+=======
+        <activity android:name=".ProfileEditActivity" >
+>>>>>>> 9e6f0203f0a3eea29fa2825b19f698272e3dad7e
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

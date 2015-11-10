@@ -9,16 +9,20 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 
 public class ProfileEditActivity extends AppCompatActivity {
@@ -50,6 +54,26 @@ public class ProfileEditActivity extends AppCompatActivity {
                 startActivityForResult(i, REQUEST_LOAD_IMAGE);
             }
         });
+
+        final EditText editText = (EditText) findViewById(R.id.editText);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (editText.getLayout().getLineCount() > 7) {
+                    editText.getText().delete(editText.getText().length() - 1, editText.getText().length());
+                }
+            }
+        });
     }
 
     @Override
@@ -76,14 +100,20 @@ public class ProfileEditActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.profile_done, menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_profile, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.item_done) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.item_done) {
             Toast.makeText(this, "Done clicked", Toast.LENGTH_SHORT).show();
             return true;
         }
@@ -108,18 +138,10 @@ public class ProfileEditActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                int rows = (int) Math.ceil((double) chosenSkills.size() / 3);
-                String[][] skillSet = new String[rows][3];
-                for (int i = 0; i < rows * 3; i++) {
-                    if (i < chosenSkills.size())
-                        skillSet[i / 3][i % 3] = chosenSkills.get(i);
-                    else
-                        skillSet[i / 3][i % 3] = "";
-                }
-
-                ListAdapter adapter = new CustomAdapter(ProfileEditActivity.this, skillSet);
+                ListAdapter adapter = new CustomAdapter(ProfileEditActivity.this, chosenSkills.toArray(new String[1]));
                 ListView listView = (ListView) findViewById(R.id.listView);
                 listView.setAdapter(adapter);
+                setListViewHeightBasedOnChildren(listView);
             }
         });
 
@@ -132,5 +154,44 @@ public class ProfileEditActivity extends AppCompatActivity {
 
         builder.create();
         builder.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        /*View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);*/
+    }
+
+    /* Method for Setting the Height of the ListView dynamically.
+     * Hack to fix the issue of not showing all the items of the ListView
+     * when placed inside a ScrollView
+     * http://stackoverflow.com/questions/18367522/android-list-view-inside-a-scroll-view
+     */
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null)
+            return;
+
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
+        int totalHeight = 0;
+        View view = null;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            view = listAdapter.getView(i, view, listView);
+            if (i == 0)
+                view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, AbsListView.LayoutParams.WRAP_CONTENT));
+
+            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += view.getMeasuredHeight();
+        }
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
     }
 }
