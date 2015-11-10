@@ -6,4 +6,9 @@
         <item>Other</item>
         <item>Unspecified</item>
     </string-array>
+    <string name="title_activity_profile">ProfileActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="years_old">years old</string>
 </resources>
