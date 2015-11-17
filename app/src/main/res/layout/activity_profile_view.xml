@@ -97,7 +97,8 @@
                 android:gravity="top|start"
                 android:height="200dp"
                 android:layout_margin="10dp"
-                android:background="@drawable/scrollview_border" />
+                android:background="@drawable/scrollview_border"
+                android:textSize="18sp"/>
 
             <LinearLayout
                 android:orientation="horizontal"

@@ -38,8 +38,7 @@ public class ProfileViewActivity extends AppCompatActivity {
         //                     or from other person's profile button on pass feed screen
         if(fromEditScreen) {
             //get info from intent
-            Bitmap image = (Bitmap) i.getExtras().getParcelable("profile_image");
-            m_ProfileImage.setImageBitmap(image);
+            Bitmap image = i.getExtras().getParcelable("profile_image");
             m_Name = i.getStringExtra("name");
             m_Age = i.getStringExtra("age");
             m_Gender = i.getStringExtra("gender");
@@ -50,12 +49,13 @@ public class ProfileViewActivity extends AppCompatActivity {
             TextView nameView = (TextView) findViewById(R.id.text_name);
             nameView.setText(m_Name);
             TextView ageView = (TextView) findViewById(R.id.text_age);
-            nameView.setText(m_Age);
+            ageView.setText(m_Age);
             TextView nameGender = (TextView) findViewById(R.id.text_gender);
-            nameView.setText(m_Gender);
+            nameGender.setText(m_Gender);
             TextView nameAbout = (TextView) findViewById(R.id.aboutString);
-            nameView.setText(m_AboutMe);
-
+            nameAbout.setText(m_AboutMe);
+            m_ProfileImage = (ImageView) findViewById(R.id.iv_profile_pic);
+            m_ProfileImage.setImageBitmap(image);
 
         }
         else if(ownProfile) {

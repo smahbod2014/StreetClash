@@ -110,7 +110,7 @@ public class ProfileEditActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_profile, menu);
+        getMenuInflater().inflate(R.menu.profile_done, menu);
         return true;
     }
 
@@ -129,8 +129,7 @@ public class ProfileEditActivity extends AppCompatActivity {
             //skills list should already be set
             m_ProfileImage.buildDrawingCache();
             Bitmap profile = m_ProfileImage.getDrawingCache();
-            Bundle profileExtra = new Bundle();
-            profileExtra.putParcelable("profile_image", profile);
+
 
             EditText editName = (EditText) findViewById(R.id.et_name);
             m_Name = editName.getText().toString();
@@ -151,7 +150,7 @@ public class ProfileEditActivity extends AppCompatActivity {
 
             //send the set fields to the real profile screen
             Intent i = new Intent(this, ProfileViewActivity.class);
-            i.putExtras(profileExtra);
+            i.putExtra("profile_image", profile);
             i.putExtra("name", m_Name);
             i.putExtra("age", m_Age);
             i.putExtra("gender", m_Gender);
