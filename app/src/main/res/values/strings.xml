@@ -6,4 +6,6 @@
         <item>Other</item>
         <item>Unspecified</item>
     </string-array>
+    <string name="title_activity_single_fragment">SingleFragmentActivity</string>
+    <string name="title_activity_profile_list">ProfileListActivity</string>
 </resources>
