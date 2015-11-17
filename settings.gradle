@@ -1,2 +1,2 @@
-include ':app', ':VolleyFramework'
+include ':VolleyFramework', ':app'
 project(':VolleyFramework').projectDir = new File('volley')
