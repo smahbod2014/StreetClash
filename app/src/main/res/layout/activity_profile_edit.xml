@@ -40,7 +40,9 @@
                         android:inputType="textPersonName"
                         android:text="Name"
                         android:ems="10"
-                        android:id="@+id/et_name"/>
+                        android:id="@+id/et_name"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp" />
 
                     <LinearLayout
                         android:orientation="horizontal"
@@ -48,18 +50,21 @@
                         android:layout_height="wrap_content">
 
                         <EditText
-                            android:layout_width="94dp"
+                            android:layout_width="29dp"
                             android:layout_height="wrap_content"
                             android:inputType="number"
                             android:ems="10"
-                            android:id="@+id/et_age"/>
+                            android:id="@+id/et_age"
+                            android:layout_marginLeft="10dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="?android:attr/textAppearanceLarge"
-                            android:text="years old"
-                            android:id="@+id/textView2"/>
+                            android:text="@string/years_old"
+                            android:id="@+id/textView2"
+                            android:textSize="18sp"
+                            android:layout_marginLeft="5dp" />
                     </LinearLayout>
 
                     <Spinner
@@ -68,7 +73,8 @@
                         android:id="@+id/spinner_gender"
                         android:spinnerMode="dropdown"
                         android:entries="@array/gender_array"
-                        android:contextClickable="true"/>
+                        android:contextClickable="true"
+                        android:layout_marginLeft="10dp" />
 
                 </LinearLayout>
             </LinearLayout>
@@ -78,18 +84,21 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="About Me"
-                android:id="@+id/textView3"/>
+                android:id="@+id/textView3"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp" />
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/editText"
+                android:id="@+id/about_me"
                 android:gravity="top|start"
                 android:inputType="textMultiLine"
                 android:scrollHorizontally="false"
                 android:height="200dp"
                 android:maxLines="10"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:background="@drawable/scrollview_border" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -101,7 +110,8 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="Skills"
-                    android:id="@+id/textView4"/>
+                    android:id="@+id/textView4"
+                    android:layout_marginLeft="10dp" />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -131,32 +141,33 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:weightSum="1"
-        android:layout_weight="0.28">
+        android:layout_weight="0.28"
+        android:layout_marginTop="10dp">
 
         <ImageButton
-            android:layout_width="128dp"
+            android:layout_width="135dp"
             android:layout_height="match_parent"
             android:id="@+id/btn_pass_feed"
             android:layout_weight="0.26"
-            android:layout_marginLeft="8dp"
+            android:layout_marginLeft="-4dp"
             android:src="@mipmap/feed"
             android:scaleType="fitCenter"/>
 
         <ImageButton
-            android:layout_width="128dp"
+            android:layout_width="135dp"
             android:layout_height="match_parent"
             android:id="@+id/imageButton"
             android:layout_weight="0.26"
-            android:layout_marginLeft="-8dp"
+            android:layout_marginLeft="-6dp"
             android:src="@mipmap/profile"
             android:scaleType="fitCenter"
             android:adjustViewBounds="false"/>
 
         <ImageButton
-            android:layout_width="128dp"
+            android:layout_width="135dp"
             android:layout_height="match_parent"
             android:id="@+id/imageButton8"
-            android:layout_marginLeft="-8dp"
+            android:layout_marginLeft="-6dp"
             android:src="@mipmap/wrench"
             android:scaleType="fitCenter"/>
 

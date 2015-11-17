@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -22,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.Toast;
 import java.util.ArrayList;
 
@@ -38,12 +40,17 @@ public class ProfileEditActivity extends AppCompatActivity {
     };
 
     private ImageView m_ProfileImage;
+    private String m_Name;
+    private String m_Age;
+    private String m_Gender;
+    private String m_AboutMe;
+    private String[] m_Skills;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_edit);
-        setTitle("Profile");
+        setTitle("Edit Profile");
 
         Log.i(TAG, "Starting up");
         m_ProfileImage = (ImageView) findViewById(R.id.iv_profile_pic);
@@ -55,8 +62,8 @@ public class ProfileEditActivity extends AppCompatActivity {
             }
         });
 
-        final EditText editText = (EditText) findViewById(R.id.editText);
-        editText.addTextChangedListener(new TextWatcher() {
+        final EditText aboutMe = (EditText) findViewById(R.id.about_me);
+        aboutMe.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -69,11 +76,13 @@ public class ProfileEditActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (editText.getLayout().getLineCount() > 7) {
-                    editText.getText().delete(editText.getText().length() - 1, editText.getText().length());
+                if (aboutMe.getLayout().getLineCount() > 7) {
+                    aboutMe.getText().delete(aboutMe.getText().length() - 1, aboutMe.getText().length());
                 }
             }
         });
+
+        m_Skills = new String[0];
     }
 
     @Override
@@ -115,6 +124,44 @@ public class ProfileEditActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.item_done) {
             Toast.makeText(this, "Done clicked", Toast.LENGTH_SHORT).show();
+
+            //finalize fields
+            //skills list should already be set
+            m_ProfileImage.buildDrawingCache();
+            Bitmap profile = m_ProfileImage.getDrawingCache();
+            Bundle profileExtra = new Bundle();
+            profileExtra.putParcelable("profile_image", profile);
+
+            EditText editName = (EditText) findViewById(R.id.et_name);
+            m_Name = editName.getText().toString();
+
+            EditText editAge = (EditText) findViewById(R.id.et_age);
+            m_Age = editAge.getText().toString();
+
+            Spinner gender = (Spinner) findViewById(R.id.spinner_gender);
+            if(gender.getSelectedItem() == null) {
+                m_Gender = "";
+            }
+            else {
+                m_Gender = gender.getSelectedItem().toString();
+            }
+
+            EditText editAbout = (EditText) findViewById(R.id.about_me);
+            m_AboutMe = editAbout.getText().toString();
+
+            //send the set fields to the real profile screen
+            Intent i = new Intent(this, ProfileViewActivity.class);
+            i.putExtras(profileExtra);
+            i.putExtra("name", m_Name);
+            i.putExtra("age", m_Age);
+            i.putExtra("gender", m_Gender);
+            i.putExtra("about_me", m_AboutMe);
+            i.putExtra("skills", m_Skills);
+            i.putExtra("editScreen", true);
+            i.putExtra("ownProfile", false);
+
+            startActivity(i);
+
             return true;
         }
         return false;
@@ -138,6 +185,10 @@ public class ProfileEditActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
+               //store chosen skills for passing in an intent
+                m_Skills = chosenSkills.toArray(new String[chosenSkills.size()]);
+
                 ListAdapter adapter = new CustomAdapter(ProfileEditActivity.this, chosenSkills.toArray(new String[1]));
                 ListView listView = (ListView) findViewById(R.id.listView);
                 listView.setAdapter(adapter);
