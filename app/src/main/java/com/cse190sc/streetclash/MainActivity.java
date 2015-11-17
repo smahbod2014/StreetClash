@@ -1,48 +1,38 @@
 package com.cse190sc.streetclash;
 
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button m_ToastButton;
-    TextView m_Display;
-    NumberPicker m_NumberPicker;
+    Button m_PostButton;
+    private static final String TAG = "MainActivity";
+    String URL = "http://52.88.99.161:3000/users";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        m_ToastButton = (Button) findViewById(R.id.button_toast);
-        m_Display = (TextView) findViewById(R.id.tv_display);
-        m_NumberPicker = (NumberPicker) findViewById(R.id.numberPicker);
-        m_NumberPicker.setMinValue(0);
-        m_NumberPicker.setMaxValue(4);
+        m_PostButton = (Button) findViewById(R.id.btn_post);
     }
 
-    public void toastClicked(View v)
+    public void postClicked(View v)
     {
-        JsonArrayRequest request = new JsonArrayRequest(
+        /*JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
                 "http://52.88.99.161:9000/data",
                 null,
@@ -69,21 +59,46 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        Volley.newRequestQueue(this).add(request);
+        Volley.newRequestQueue(this).add(request);*/
 
-        /*JsonObjectRequest request = new JsonObjectRequest(
+        /**/
+        JSONObject jo = null;
+        try {
+            jo = new JSONObject("{\"first\":\"Donald\", \"last\":\"Trump\"}");
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,
+                URL,
+                jo,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.i(TAG, "Got response: " + response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i(TAG, "Error: " + error.getMessage());
+                    }
+                });
+        Volley.newRequestQueue(this).add(req);
+        Toast.makeText(MainActivity.this, "Sent post...", Toast.LENGTH_SHORT).show();
+    }
+
+    public void getClicked(View v) {
+        JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
-                "http://52.88.99.161:9000",
+                URL,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            String body = "";
-                            body += "Name: " + response.getString("name") + "\n";
-                            JSONObject interests = response.getJSONObject("interests");
-                            body += "Night interest: " + interests.getString("night");
-                            m_Display.setText(body);
+                            Log.i(TAG, "Response: " + response.getString("first"));
                         }
                         catch (JSONException e) {
                             e.printStackTrace();
@@ -94,11 +109,11 @@ public class MainActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        m_Display.setText("Error: " + error.getMessage());
+                        Log.i(TAG, "Error: " + error.getMessage());
                     }
                 }
         );
 
-        Volley.newRequestQueue(this).add(request);*/
+        Volley.newRequestQueue(this).add(request);
     }
 }

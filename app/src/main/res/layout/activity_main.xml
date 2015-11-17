@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Click button to get results"
+        android:text="Enter name here"
         android:id="@+id/textView"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"/>
@@ -23,29 +23,29 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get results"
-        android:id="@+id/button_toast"
-        android:onClick="toastClicked"
-        android:layout_marginTop="39dp"
-        android:layout_below="@+id/textView"
-        android:layout_alignStart="@+id/textView"/>
+        android:text="Post"
+        android:id="@+id/btn_post"
+        android:onClick="postClicked"
+        android:layout_marginTop="41dp"
+        android:layout_below="@+id/et_first"
+        android:layout_alignStart="@+id/et_first"/>
 
-    <TextView
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/tv_display"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/numberPicker"/>
+        android:id="@+id/et_first"
+        android:layout_marginTop="30dp"
+        android:width="200dp"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"/>
 
-    <NumberPicker
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/numberPicker"
-        android:layout_marginEnd="30dp"
-        android:layout_below="@+id/textView"
-        android:layout_alignEnd="@+id/textView"/>
+        android:text="Get"
+        android:id="@+id/btn_get"
+        android:layout_alignTop="@+id/btn_post"
+        android:layout_toEndOf="@+id/btn_post"
+        android:onClick="getClicked"/>
 
 </RelativeLayout>
