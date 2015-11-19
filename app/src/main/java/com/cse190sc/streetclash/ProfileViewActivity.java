@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class ProfileViewActivity extends AppCompatActivity {
@@ -45,6 +47,7 @@ public class ProfileViewActivity extends AppCompatActivity {
             m_AboutMe = i.getStringExtra("about_me");
             m_Skills = i.getStringArrayExtra("skills");
 
+
             //set views
             TextView nameView = (TextView) findViewById(R.id.text_name);
             nameView.setText(m_Name);
@@ -57,6 +60,10 @@ public class ProfileViewActivity extends AppCompatActivity {
             m_ProfileImage = (ImageView) findViewById(R.id.iv_profile_pic);
             m_ProfileImage.setImageBitmap(image);
 
+            ListAdapter adapter = new CustomAdapter(this, m_Skills);
+            ListView listView = (ListView) findViewById(R.id.listView);
+            listView.setAdapter(adapter);
+            ProfileEditActivity.setListViewHeightBasedOnChildren(listView);
         }
         else if(ownProfile) {
 
