@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/profile_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:weightSum="1"
+        android:layout_weight="0.1">
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="match_parent"
+            android:id="@+id/btn_pass_feed"
+            android:layout_weight="0.26"
+            android:layout_marginLeft="8dp"
+            android:src="@mipmap/feed"
+            android:scaleType="fitCenter"/>
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="match_parent"
+            android:id="@+id/imageButton"
+            android:layout_weight="0.26"
+            android:layout_marginLeft="-8dp"
+            android:src="@mipmap/profile"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="false"/>
+
+        <ImageButton
+            android:layout_width="128dp"
+            android:layout_height="match_parent"
+            android:id="@+id/imageButton8"
+            android:layout_marginLeft="-8dp"
+            android:src="@mipmap/wrench"
+            android:scaleType="fitCenter"/>
+
+    </LinearLayout>
+</LinearLayout>

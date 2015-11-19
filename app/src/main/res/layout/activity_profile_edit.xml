@@ -151,7 +151,8 @@
             android:layout_weight="0.26"
             android:layout_marginLeft="-4dp"
             android:src="@mipmap/feed"
-            android:scaleType="fitCenter"/>
+            android:scaleType="fitCenter"
+            android:onClick="passFeedButtonClicked"/>
 
         <ImageButton
             android:layout_width="135dp"
