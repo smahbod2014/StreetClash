@@ -34,7 +34,6 @@ public class ProfileViewActivity extends AppCompatActivity {
     private String[] m_Skills;
 
     //Beacon Code
-    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private BeaconTransmitterApplication m_Application;
 
     @Override
@@ -45,7 +44,6 @@ public class ProfileViewActivity extends AppCompatActivity {
 
         //Beacon Code
         m_Application = (BeaconTransmitterApplication) this.getApplicationContext();
-        doPermissionChecks();
 
         Intent i = getIntent();
         fromEditScreen = i.getBooleanExtra("editScreen", false);
@@ -110,41 +108,6 @@ public class ProfileViewActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "onResume()");
         m_Application.setInsideActivity(true);
-    }
-
-    private void doPermissionChecks() {
-        //this huge block of code is to let this work on phones running
-        //Android 6.0, like my Nexus 5
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("This app needs location access");
-                builder.setMessage("Please grant location access so this app can detect beacons");
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @TargetApi(23)
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                                PERMISSION_REQUEST_COARSE_LOCATION);
-                    }
-                });
-                builder.show();
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_COARSE_LOCATION) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG, "Location permission granted!");
-            }
-            else {
-                //inform the user here that they will not be able to use the app properly
-            }
-        }
     }
 
     @Override
