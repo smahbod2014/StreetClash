@@ -1,11 +1,19 @@
 package com.cse190sc.streetclash;
 
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -25,11 +33,19 @@ public class ProfileViewActivity extends AppCompatActivity {
     private String m_AboutMe;
     private String[] m_Skills;
 
+    //Beacon Code
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
+    private BeaconTransmitterApplication m_Application;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_view);
         setTitle("Profile");
+
+        //Beacon Code
+        m_Application = (BeaconTransmitterApplication) this.getApplicationContext();
+        doPermissionChecks();
 
         Intent i = getIntent();
         fromEditScreen = i.getBooleanExtra("editScreen", false);
@@ -70,6 +86,64 @@ public class ProfileViewActivity extends AppCompatActivity {
         }
         else {
 
+        }
+    }
+
+    public void passFeedButtonClicked(View v) {
+        Intent i = new Intent(this, ProfileListActivity.class);
+        startActivity(i);
+    }
+    public void optionsButtonClicked(View v) {
+        Intent i = new Intent(this, OptionsActivity.class);
+        startActivity(i);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause()");
+        m_Application.setInsideActivity(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume()");
+        m_Application.setInsideActivity(true);
+    }
+
+    private void doPermissionChecks() {
+        //this huge block of code is to let this work on phones running
+        //Android 6.0, like my Nexus 5
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("This app needs location access");
+                builder.setMessage("Please grant location access so this app can detect beacons");
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @TargetApi(23)
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                                PERMISSION_REQUEST_COARSE_LOCATION);
+                    }
+                });
+                builder.show();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_COARSE_LOCATION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG, "Location permission granted!");
+            }
+            else {
+                //inform the user here that they will not be able to use the app properly
+            }
         }
     }
 

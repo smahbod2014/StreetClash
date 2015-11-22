@@ -18,12 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ProfileViewActivity">
+        <activity android:name=".ProfileViewActivity" >
+        </activity>
+        <activity android:name=".ProfileListActivity" >
         </activity>
         <activity
-            android:name=".ProfileListActivity">
-
+            android:name=".OptionsActivity"
+            android:label="@string/title_activity_options" >
         </activity>
     </application>
 

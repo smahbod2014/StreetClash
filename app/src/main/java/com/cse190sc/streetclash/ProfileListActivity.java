@@ -1,18 +1,29 @@
 package com.cse190sc.streetclash;
 
 
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +47,10 @@ public class ProfileListActivity extends AppCompatActivity {
     private ProfileAdapter mAdapter;
     private ItemTouchHelper mItemTouchHelper;
 
+    //Beacon Stuff
+    private static final String TAG = "ProfileListActivity";
+    private BeaconTransmitterApplication m_Application;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -46,6 +61,44 @@ public class ProfileListActivity extends AppCompatActivity {
         mProfileRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         updateUI();
+
+        m_Application = (BeaconTransmitterApplication) this.getApplicationContext();
+
+        boolean b = this.getIntent().getBooleanExtra("arrivedFromNotification", false);
+        if (b) {
+            Toast.makeText(this, "Arrived from notification", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Came from notification");
+        }
+        else {
+            Toast.makeText(this, "Opened app manually", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Opened app manually");
+        }
+
+    }
+
+    public void profileButtonClicked(View v) {
+        Intent i = new Intent(this, ProfileViewActivity.class);
+        i.putExtra("editScreen", false);
+        i.putExtra("ownProfile", true);
+        startActivity(i);
+    }
+    public void optionsButtonClicked(View v) {
+        Intent i = new Intent(this, OptionsActivity.class);
+        startActivity(i);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause()");
+        m_Application.setInsideActivity(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume()");
+        m_Application.setInsideActivity(true);
     }
 
     private void updateUI(){

@@ -86,11 +86,6 @@ public class ProfileEditActivity extends AppCompatActivity {
         m_Skills = new String[0];
     }
 
-    public void passFeedButtonClicked(View v) {
-        Intent i = new Intent(this, ProfileListActivity.class);
-        startActivity(i);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

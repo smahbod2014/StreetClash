@@ -7,7 +7,7 @@
 
     <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="444dp"
+        android:layout_height="match_parent"
         android:id="@+id/scrollView2">
 
         <LinearLayout
@@ -135,43 +135,5 @@
 
         </LinearLayout>
     </ScrollView>
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:weightSum="1"
-        android:layout_weight="0.28"
-        android:layout_marginTop="10dp">
-
-        <ImageButton
-            android:layout_width="135dp"
-            android:layout_height="match_parent"
-            android:id="@+id/btn_pass_feed"
-            android:layout_weight="0.26"
-            android:layout_marginLeft="-4dp"
-            android:src="@mipmap/feed"
-            android:scaleType="fitCenter"
-            android:onClick="passFeedButtonClicked"/>
-
-        <ImageButton
-            android:layout_width="135dp"
-            android:layout_height="match_parent"
-            android:id="@+id/imageButton"
-            android:layout_weight="0.26"
-            android:layout_marginLeft="-6dp"
-            android:src="@mipmap/profile"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="false"/>
-
-        <ImageButton
-            android:layout_width="135dp"
-            android:layout_height="match_parent"
-            android:id="@+id/imageButton8"
-            android:layout_marginLeft="-6dp"
-            android:src="@mipmap/wrench"
-            android:scaleType="fitCenter"/>
-
-    </LinearLayout>
 
 </LinearLayout>

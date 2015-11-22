@@ -14,4 +14,6 @@
     <string name="title_activity_profile_view">ProfileViewActivity</string>
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
     <string name="title_activity_profile_list">ProfileListActivity</string>
+    <string name="title_activity_launch">LaunchActivity</string>
+    <string name="title_activity_options">OptionsActivity</string>
 </resources>
