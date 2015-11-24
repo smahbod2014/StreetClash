@@ -1,6 +1,8 @@
 package com.cse190sc.streetclash;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +12,18 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileViewActivity extends AppCompatActivity {
 
@@ -35,6 +49,11 @@ public class ProfileViewActivity extends AppCompatActivity {
         fromEditScreen = i.getBooleanExtra("editScreen", false);
         ownProfile = i.getBooleanExtra("ownProfile", true);
 
+        final TextView nameView = (TextView) findViewById(R.id.text_name);
+        final TextView ageView = (TextView) findViewById(R.id.text_age);
+        m_ProfileImage = (ImageView) findViewById(R.id.iv_profile_pic);
+        final TextView nameGender = (TextView) findViewById(R.id.text_gender);
+        final TextView nameAbout = (TextView) findViewById(R.id.aboutString);
         //different fields depending on how profile was accessed
         //three possibilities: from editing own profile, from personal profile button,
         //                     or from other person's profile button on pass feed screen
@@ -49,15 +68,10 @@ public class ProfileViewActivity extends AppCompatActivity {
 
 
             //set views
-            TextView nameView = (TextView) findViewById(R.id.text_name);
             nameView.setText(m_Name);
-            TextView ageView = (TextView) findViewById(R.id.text_age);
             ageView.setText(m_Age);
-            TextView nameGender = (TextView) findViewById(R.id.text_gender);
             nameGender.setText(m_Gender);
-            TextView nameAbout = (TextView) findViewById(R.id.aboutString);
             nameAbout.setText(m_AboutMe);
-            m_ProfileImage = (ImageView) findViewById(R.id.iv_profile_pic);
             m_ProfileImage.setImageBitmap(image);
 
             ListAdapter adapter = new CustomAdapter(this, m_Skills);
@@ -66,7 +80,51 @@ public class ProfileViewActivity extends AppCompatActivity {
             ProfileEditActivity.setListViewHeightBasedOnChildren(listView);
         }
         else if(ownProfile) {
+            SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.GET,
+                    Constants.SERVER_URL + "/users?userID=" + prefs.getString("userID", "invalid"),
+                    null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                String name = response.getString("name");
+                                int age = response.getInt("age");
+                                String gender = response.getString("gender");
+                                String about = response.getString("about");
+//                                String email = response.getString("email");
 
+                                JSONArray skillsArray = response.getJSONArray("skills");
+                                String[] skills = new String[skillsArray.length()];
+                                for (int i = 0; i < skillsArray.length(); i++) {
+                                   skills[i] = (String) skillsArray.get(i);
+                                }
+
+                                nameView.setText(name);
+                                ageView.setText(age);
+                                nameGender.setText(gender);
+                                nameAbout.setText(about);
+                                //m_ProfileImage.setImageBitmap(image);
+
+                                ListAdapter adapter = new CustomAdapter(getApplicationContext(), skills);
+                                ListView listView = (ListView) findViewById(R.id.listView);
+                                listView.setAdapter(adapter);
+                                ProfileEditActivity.setListViewHeightBasedOnChildren(listView);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    }
+            );
+
+            VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
         }
         else {
 

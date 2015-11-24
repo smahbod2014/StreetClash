@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +27,17 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class ProfileEditActivity extends AppCompatActivity {
@@ -165,8 +177,62 @@ public class ProfileEditActivity extends AppCompatActivity {
             i.putExtra("editScreen", true);
             i.putExtra("ownProfile", false);
 
+            //temporary image field
+
+
             //send stuff to server
             //m_ProfileImage.get
+
+            JSONObject obj = null;
+            try {
+                obj = new JSONObject();
+                obj.put("name", m_Name);
+                obj.put("age", m_Age);
+                obj.put("gender", m_Gender);
+                obj.put("about", m_AboutMe);
+                obj.put("image", "temporary");
+                JSONArray skillsArray = new JSONArray();
+                for (int index = 0; index < m_Skills.length; index++) {
+                    skillsArray.put(m_Skills[index]);
+                }
+                obj.put("skills", skillsArray);
+                SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+//                obj.put("email", prefs.getString("email", "none"));
+                obj.put("userID", prefs.getString("userID", "invalid"));
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.PUT,
+                    Constants.SERVER_URL + "/users",
+                    obj,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                boolean update = response.getBoolean("docUpdate");
+                                if (update)
+                                    Log.i(TAG, "ProfileEditActivity: Updated successfully");
+                                else
+                                    Log.e(TAG, "ProfileEditActivity: Error updating");
+                            }
+                            catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e(TAG, "ProfileEditActivity: Volley error: " + error.getMessage());
+                        }
+                    }
+            );
+
+//            Volley.newRequestQueue(this).add(request);
+            VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
 
             startActivity(i);
 
