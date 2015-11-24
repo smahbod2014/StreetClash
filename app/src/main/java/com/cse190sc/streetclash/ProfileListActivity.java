@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,24 +18,18 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.List;
 
-/*public class ProfileListActivity extends SingleFragmentActivity {
+import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setTitle("Pass Feed");
-    }
-
-    @Override
-    protected Fragment createFragment(){
-        return new ProfileListFragment();
-    }
-}*/
 
 public class ProfileListActivity extends AppCompatActivity {
     private RecyclerView mProfileRecyclerView;
     private ProfileAdapter mAdapter;
     private ItemTouchHelper mItemTouchHelper;
+    private Tracker mTracker;
+    private static final String TAG = "ProfileListActivity";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -44,6 +39,22 @@ public class ProfileListActivity extends AppCompatActivity {
 
         mProfileRecyclerView = (RecyclerView) findViewById(R.id.profile_recycler_view);
         mProfileRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        Analytics application = (Analytics) getApplication();
+        mTracker = application.getDefaultTracker();
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        // [START screen_view_hit]
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // [END screen_view_hit]
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Share")
+                .build());
 
         updateUI();
     }

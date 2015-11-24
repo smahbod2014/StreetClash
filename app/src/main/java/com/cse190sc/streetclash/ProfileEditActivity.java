@@ -26,6 +26,10 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
+
 import java.util.ArrayList;
 
 public class ProfileEditActivity extends AppCompatActivity {
@@ -46,6 +50,7 @@ public class ProfileEditActivity extends AppCompatActivity {
     private String m_Gender;
     private String m_AboutMe;
     private String[] m_Skills;
+    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +89,23 @@ public class ProfileEditActivity extends AppCompatActivity {
         });
 
         m_Skills = new String[0];
+
+        //ANALYTICS
+        Analytics application = (Analytics) getApplication();
+        mTracker = application.getDefaultTracker();
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        // [START screen_view_hit]
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // [END screen_view_hit]
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Share")
+                .build());
     }
 
     public void passFeedButtonClicked(View v) {

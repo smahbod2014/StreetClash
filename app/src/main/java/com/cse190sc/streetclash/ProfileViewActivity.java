@@ -4,12 +4,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
 
 public class ProfileViewActivity extends AppCompatActivity {
 
@@ -24,6 +27,7 @@ public class ProfileViewActivity extends AppCompatActivity {
     private String m_Gender;
     private String m_AboutMe;
     private String[] m_Skills;
+    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,22 @@ public class ProfileViewActivity extends AppCompatActivity {
         else {
 
         }
+
+        Analytics application = (Analytics) getApplication();
+        mTracker = application.getDefaultTracker();
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        // [START screen_view_hit]
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // [END screen_view_hit]
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Share")
+                .build());
     }
 
     @Override
