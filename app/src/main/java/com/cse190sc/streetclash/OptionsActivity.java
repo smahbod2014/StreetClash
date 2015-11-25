@@ -86,7 +86,7 @@ public class OptionsActivity extends AppCompatActivity {
     }
 
     public void passFeedButtonClicked(View v) {
-        Intent i = new Intent(this, ProfileListActivity.class);
+        Intent i = new Intent(this, SingleFragmentActivity.class);
         startActivity(i);
     }
     public void profileButtonClicked(View v) {

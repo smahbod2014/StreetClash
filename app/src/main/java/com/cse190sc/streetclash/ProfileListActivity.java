@@ -42,7 +42,7 @@ import java.util.List;
     }
 }*/
 
-public class ProfileListActivity extends AppCompatActivity {
+/*public class ProfileListActivity extends AppCompatActivity {
     private RecyclerView mProfileRecyclerView;
     private ProfileAdapter mAdapter;
     private ItemTouchHelper mItemTouchHelper;
@@ -132,12 +132,12 @@ public class ProfileListActivity extends AppCompatActivity {
             mNameView.setText(mProfile.getMname());
             //mPhotoView.setImageDrawable(null);
         }
-
+*/
         /*@Override*/
         /*public void onClick(View v){
             Toast.makeText(getActivity(), mProfile.getMname() + "clicked!", Toast.LENGTH_SHORT).show();
         }*/
-        @Override
+ /*       @Override
         public void onItemSelected() {
             itemView.setBackgroundColor(Color.LTGRAY);
         }
@@ -200,4 +200,4 @@ public class ProfileListActivity extends AppCompatActivity {
 
     }
 
-}
+}*/

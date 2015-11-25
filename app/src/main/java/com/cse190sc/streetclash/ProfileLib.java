@@ -3,7 +3,7 @@ package com.cse190sc.streetclash;
 import java.util.ArrayList;
 import java.util.*;
 import android.content.Context;
-
+import android.widget.ImageView;
 /**
  * Created by Aki on 11/12/15.
  */
@@ -22,8 +22,11 @@ public class ProfileLib {
         lib = new ArrayList<Profile>();
         for(int i=0; i<10; ++i){
             Profile pro = new Profile();
-            pro.setMname("my name is "+i+'0');
-            pro.setMusername("");
+            pro.setM_Name("student"+i);
+            pro.setM_Age("" + i);
+            pro.setM_Gender("male");
+            pro.setM_AboutMe("I am a student");
+            pro.setM_Skills(new String[]{"java","android"});
             //pro.setPhoto();
             lib.add(pro);
         }
@@ -35,7 +38,7 @@ public class ProfileLib {
 
     public Profile getProfile(String user){
         for (Profile prof: lib){
-            if(prof.getMusername() == user){
+            if(prof.getM_Name() == user){
                 return prof;
             }
         }

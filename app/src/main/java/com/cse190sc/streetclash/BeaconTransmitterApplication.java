@@ -189,7 +189,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                         .setAutoCancel(true);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        Intent i = new Intent(this, ProfileListActivity.class);
+        Intent i = new Intent(this, SingleFragmentActivity.class);
         i.putExtra("arrivedFromNotification", true);
         stackBuilder.addNextIntent(i);
         PendingIntent resultPendingIntent =

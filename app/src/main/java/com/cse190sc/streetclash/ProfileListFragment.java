@@ -11,7 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.content.Intent;
+import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,8 +51,7 @@ public class ProfileListFragment extends Fragment{
         mItemTouchHelper.attachToRecyclerView(mProfileRecyclerView);
     }
 
-    private class ProfileHolder extends RecyclerView.ViewHolder implements
-            ItemTouchHelperViewHolder{
+    private class ProfileHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView mNameView;
         private ImageView mPhotoView;
 
@@ -57,7 +59,7 @@ public class ProfileListFragment extends Fragment{
 
         public ProfileHolder(View itemView){
             super(itemView);
-            //itemView.setOnClickListener(this);
+            itemView.setOnClickListener(this);
 
             mNameView = (TextView) itemView.findViewById(R.id.list_item_profile_name_text_view);
             mPhotoView = (ImageView) itemView.findViewById(R.id.list_item_profile_photo_image_view);
@@ -65,15 +67,28 @@ public class ProfileListFragment extends Fragment{
 
         public void bindProfile (Profile profile){
             mProfile = profile;
-            mNameView.setText(mProfile.getMname());
+            mNameView.setText(mProfile.getM_Name());
             //mPhotoView.setImageDrawable(null);
         }
 
-        /*@Override*/
-        /*public void onClick(View v){
-            Toast.makeText(getActivity(), mProfile.getMname() + "clicked!", Toast.LENGTH_SHORT).show();
-        }*/
         @Override
+        public void onClick(View v){
+            //Toast.makeText(getActivity(), mProfile.getMname() + "clicked!", Toast.LENGTH_SHORT).show();
+            String name=mProfile.getM_Name();
+            System.out.println(name);
+            String age=mProfile.getM_Age();
+            System.out.println(age);
+            String gender=mProfile.getM_Gender();
+            System.out.println(gender);
+            String aboutMe=mProfile.getM_AboutMe();
+            System.out.println(aboutMe);
+            String[] skills=mProfile.getM_Skills();
+            System.out.println(Arrays.toString(skills));
+
+            Intent intent=ProfileViewActivity.newIntent(getActivity(),name,age,gender,aboutMe,skills,null);
+            startActivity(intent);
+        }
+        /*@Override
         public void onItemSelected() {
             itemView.setBackgroundColor(Color.LTGRAY);
         }
@@ -81,7 +96,7 @@ public class ProfileListFragment extends Fragment{
         @Override
         public void onItemClear() {
             itemView.setBackgroundColor(0);
-        }
+        }*/
     }
 
     private class ProfileAdapter extends RecyclerView.Adapter<ProfileHolder>implements ItemTouchHelperAdapter{

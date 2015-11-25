@@ -6,39 +6,70 @@ import android.widget.ImageView;
  * Created by Aki on 11/12/15.
  */
 public class Profile {
-    private String musername;
-    private String mname;
-    private ImageView photo;
+    private ImageView m_ProfileImage;
+    private String m_Name;
+    private String m_Age;
+    private String m_Gender;
+    private String m_AboutMe;
+    private String[] m_Skills;
 
     public Profile(){}
-
-    public String getMusername() {
-        return musername;
+    public Profile(String name, String age,String gender,String aboutMe, String[] skills, ImageView image){
+        this.m_Name=name;
+        this.m_Age=age;
+        this.m_Gender=gender;
+        this.m_AboutMe=aboutMe;
+        this.m_Skills=skills;
+        this.m_ProfileImage= image;
     }
 
-    public String getMname() {
-        return mname;
+    public String getM_Age() {
+        return m_Age;
     }
 
-    public ImageView getPhoto() {
-        return photo;
+    public void setM_Age(String m_Age) {
+        this.m_Age = m_Age;
     }
 
-    public void setMusername(String musername) {
-        this.musername = musername;
+    public ImageView getM_ProfileImage() {
+        return m_ProfileImage;
     }
 
-    public void setMname(String mname) {
-        this.mname = mname;
+    public void setM_ProfileImage(ImageView m_ProfileImage) {
+        this.m_ProfileImage = m_ProfileImage;
     }
 
-    public void setPhoto(ImageView photo) {
-        this.photo = photo;
+    public String getM_Name() {
+        return m_Name;
     }
 
-    public Profile(String u, String n, ImageView p){
-        this.musername = u;
-        this.mname = n;
-        this.photo = p;
+    public void setM_Name(String m_Name) {
+        this.m_Name = m_Name;
     }
+
+    public String getM_Gender() {
+        return m_Gender;
+    }
+
+    public void setM_Gender(String m_Gender) {
+        this.m_Gender = m_Gender;
+    }
+
+    public String getM_AboutMe() {
+        return m_AboutMe;
+    }
+
+    public void setM_AboutMe(String m_AboutMe) {
+        this.m_AboutMe = m_AboutMe;
+    }
+
+    public String[] getM_Skills() {
+        return m_Skills;
+    }
+
+    public void setM_Skills(String[] m_Skills) {
+        this.m_Skills = m_Skills;
+    }
+
+
 }

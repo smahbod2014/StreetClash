@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.content.Context;
 
 public class ProfileViewActivity extends AppCompatActivity {
 
@@ -25,6 +26,7 @@ public class ProfileViewActivity extends AppCompatActivity {
 
     private boolean fromEditScreen = false;
     private boolean ownProfile = true;
+    private boolean fromListScreen=false;
 
     private ImageView m_ProfileImage;
     private String m_Name;
@@ -43,16 +45,17 @@ public class ProfileViewActivity extends AppCompatActivity {
         setTitle("Profile");
 
         //Beacon Code
-        m_Application = (BeaconTransmitterApplication) this.getApplicationContext();
+        //m_Application = (BeaconTransmitterApplication) this.getApplicationContext();
 
         Intent i = getIntent();
         fromEditScreen = i.getBooleanExtra("editScreen", false);
-        ownProfile = i.getBooleanExtra("ownProfile", true);
 
+        ownProfile = i.getBooleanExtra("ownProfile", true);
+        fromListScreen=i.getBooleanExtra("listScreen",false);
         //different fields depending on how profile was accessed
         //three possibilities: from editing own profile, from personal profile button,
         //                     or from other person's profile button on pass feed screen
-        if(fromEditScreen) {
+        if(fromEditScreen||fromListScreen) {
             //get info from intent
             Bitmap image = i.getExtras().getParcelable("profile_image");
             m_Name = i.getStringExtra("name");
@@ -87,8 +90,19 @@ public class ProfileViewActivity extends AppCompatActivity {
         }
     }
 
+    public static Intent newIntent(Context packageContext,String name,String age, String gender,String aboutMe,String[] skills,ImageView image){
+        Intent i=new Intent(packageContext, ProfileViewActivity.class);
+        i.putExtra("name", name);
+        i.putExtra("age",age);
+        i.putExtra("gender", gender);
+        i.putExtra("about_me",aboutMe);
+        i.putExtra("skills",skills);
+        i.putExtra("listScreen",true);
+        return i;
+    }
+
     public void passFeedButtonClicked(View v) {
-        Intent i = new Intent(this, ProfileListActivity.class);
+        Intent i = new Intent(this, SingleFragmentActivity.class);
         startActivity(i);
     }
     public void optionsButtonClicked(View v) {
@@ -96,7 +110,7 @@ public class ProfileViewActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    @Override
+   /* @Override
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "onPause()");
@@ -108,7 +122,7 @@ public class ProfileViewActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "onResume()");
         m_Application.setInsideActivity(true);
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
