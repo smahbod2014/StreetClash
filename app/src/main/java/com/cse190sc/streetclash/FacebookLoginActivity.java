@@ -151,43 +151,30 @@ public class FacebookLoginActivity extends AppCompatActivity
 //                            }
 //                        }).executeAsync();
 
-                        SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash",
+                        final SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash",
                                 Context.MODE_PRIVATE);
-//                        prefs.edit().putString("email", email).apply();
                         prefs.edit().putString("userID", userID).apply();
-
-                        JSONObject obj= null;
-                        try {
-                            obj = new JSONObject();
-                            obj.put("userID", userID);
-                        }
-                        catch (JSONException e) {
-                            e.printStackTrace();
-                        }
 
                         JsonObjectRequest request = new JsonObjectRequest(
                                 Request.Method.GET,
-                                Constants.SERVER_URL + "/facebook",
-                                obj,
+                                Constants.SERVER_URL + "/users/facebook?userID=" + userID,
+                                null,
                                 new Response.Listener<JSONObject>() {
                                     @Override
                                     public void onResponse(JSONObject response) {
                                         if (response.has("newUser")) {
                                             //we are a new user
+                                            Log.i("StreetClash", "Facebook: New user!");
                                             Intent i = new Intent(getApplicationContext(), ProfileEditActivity.class);
+                                            prefs.edit().putBoolean("newUser", true).apply();
                                             startActivity(i);
                                             finish();
                                         }
                                         else {
-                                            try {
-                                                String name = response.getString("name");
-                                                Intent i = new Intent(getApplicationContext(), ProfileListActivity.class);
-                                                startActivity(i);
-                                                finish();
-                                            }
-                                            catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
+                                            prefs.edit().putBoolean("newUser", false).apply();
+                                            Intent i = new Intent(getApplicationContext(), ProfileListActivity.class);
+                                            startActivity(i);
+                                            finish();
                                         }
                                     }
                                 },
@@ -232,7 +219,7 @@ public class FacebookLoginActivity extends AppCompatActivity
                      *****************************************************************/
                     @Override
                     public void onCancel() {
-                        Log.e("CSE 190 FB Login Demo: ", "onCancel");
+                        Log.e("StreetClash", "onCancel");
                     }
 
                     /******************************************************************
@@ -241,7 +228,7 @@ public class FacebookLoginActivity extends AppCompatActivity
                      *****************************************************************/
                     @Override
                     public void onError(FacebookException error) {
-                        Log.e("CSE 190 FB Login Demo: ", "onError");
+                        Log.e("StreetClash", "Error: " + error.getMessage());
                     }
                 });
 

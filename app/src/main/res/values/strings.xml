@@ -14,7 +14,6 @@
     <string name="title_activity_profile_view">ProfileViewActivity</string>
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
     <string name="title_activity_profile_list">ProfileListActivity</string>
-    <string name="server_url">https://52.88.99.161:3000</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -29,4 +28,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="title_activity_launch">LaunchActivity</string>
+    <string name="title_activity_options">OptionsActivity</string>
 </resources>

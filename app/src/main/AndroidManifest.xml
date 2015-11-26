@@ -13,22 +13,33 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:name=".BeaconTransmitterApplication"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".FacebookLoginActivity" >
+            android:name=".FacebookLoginActivity"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ProfileEditActivity" >
+        <activity
+            android:name=".ProfileEditActivity"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".ProfileViewActivity">
+            android:name=".ProfileViewActivity"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".ProfileListActivity">
+            android:name=".ProfileListActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".OptionsActivity"
+            android:label="@string/title_activity_options"
+            android:screenOrientation="portrait" >
         </activity>
         <activity android:name="com.facebook.FacebookActivity"
                   android:configChanges=

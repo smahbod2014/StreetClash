@@ -96,11 +96,9 @@ public class ProfileEditActivity extends AppCompatActivity {
         });
 
         m_Skills = new String[0];
-    }
 
-    public void passFeedButtonClicked(View v) {
-        Intent i = new Intent(this, ProfileListActivity.class);
-        startActivity(i);
+        if (getIntent().hasExtra("cameFromProfileView"))
+            populateFields();
     }
 
     @Override
@@ -183,6 +181,8 @@ public class ProfileEditActivity extends AppCompatActivity {
             //send stuff to server
             //m_ProfileImage.get
 
+            SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+
             JSONObject obj = null;
             try {
                 obj = new JSONObject();
@@ -191,26 +191,38 @@ public class ProfileEditActivity extends AppCompatActivity {
                 obj.put("gender", m_Gender);
                 obj.put("about", m_AboutMe);
                 obj.put("image", "temporary");
-                JSONArray skillsArray = new JSONArray();
+//                JSONArray skillsArray = new JSONArray();
+                ArrayList<String> skillsList = new ArrayList<>();
                 for (int index = 0; index < m_Skills.length; index++) {
-                    skillsArray.put(m_Skills[index]);
+//                    skillsArray.put(m_Skills[index]);
+                    skillsList.add(m_Skills[index]);
                 }
-                obj.put("skills", skillsArray);
-                SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
-//                obj.put("email", prefs.getString("email", "none"));
+//                obj.put("skills", skillsArray);
+                obj.put("skills", new JSONArray(skillsList));
                 obj.put("userID", prefs.getString("userID", "invalid"));
+                Log.i(TAG, obj.toString());
             }
             catch (JSONException e) {
                 e.printStackTrace();
             }
 
+            int method = Request.Method.PUT;
+            if (prefs.getBoolean("newUser", true)) {
+                method = Request.Method.POST;
+                Log.i(TAG, "Using POST in ProfileEditActivity");
+            }
+            else {
+                Log.i(TAG, "Using PUT in ProfileEditActivity");
+            }
+
             JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.PUT,
+                    method,
                     Constants.SERVER_URL + "/users",
                     obj,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
+                            Log.i(TAG, "ProfileEditActivity: received response...");
                             try {
                                 boolean update = response.getBoolean("docUpdate");
                                 if (update)
@@ -279,6 +291,44 @@ public class ProfileEditActivity extends AppCompatActivity {
 
         builder.create();
         builder.show();
+    }
+
+    private void populateFields() {
+        Intent i = getIntent();
+        EditText editName = (EditText) findViewById(R.id.et_name);
+        String name = i.getStringExtra("name");
+        editName.setText(name);
+
+        EditText editAge = (EditText) findViewById(R.id.et_age);
+        String age = i.getStringExtra("age");
+        editAge.setText(age);
+
+        Spinner gender = (Spinner) findViewById(R.id.spinner_gender);
+        String g = i.getStringExtra("gender");
+        int selection = 0;
+        if (g.equals("Male")) {
+            selection = 0;
+        }
+        else if (g.equals("Female")) {
+            selection = 1;
+        }
+        else if (g.equals("Other")) {
+            selection = 2;
+        }
+        else if (g.equals("Unspecified")) {
+            selection = 3;
+        }
+        gender.setSelection(selection);
+
+        EditText editAbout = (EditText) findViewById(R.id.about_me);
+        String about = i.getStringExtra("about");
+        //editAbout.setText(about);
+
+        String[] skills = i.getStringArrayExtra("skills");
+        ListAdapter adapter = new CustomAdapter(ProfileEditActivity.this, skills);
+        ListView listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(adapter);
+        setListViewHeightBasedOnChildren(listView);
     }
 
     /* Method for Setting the Height of the ListView dynamically.

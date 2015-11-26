@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/profile_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="444dp"
-        android:layout_weight="4.11" />
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transmitting"
+        android:textOn="On"
+        android:textOff="Off"
+        android:id="@+id/transmit_switch"
+        android:checked="false"
+        android:layout_marginTop="100dp"
+        android:layout_marginLeft="50dp" />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="62dp"
         android:weightSum="1"
-        android:layout_weight="0.28"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="-5dp">
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentStart="false"
+        android:layout_marginTop="327dp">
 
         <ImageButton
             android:layout_width="135dp"
@@ -25,7 +32,8 @@
             android:layout_weight="0.26"
             android:layout_marginLeft="-4dp"
             android:src="@mipmap/feed"
-            android:scaleType="fitCenter"/>
+            android:scaleType="fitCenter"
+            android:onClick="passFeedButtonClicked"/>
 
         <ImageButton
             android:layout_width="135dp"
@@ -44,8 +52,10 @@
             android:id="@+id/imageButton8"
             android:layout_marginLeft="-6dp"
             android:src="@mipmap/wrench"
-            android:scaleType="fitCenter"
-            android:onClick="optionsButtonClicked"/>
+            android:scaleType="fitCenter"/>
 
     </LinearLayout>
+
 </LinearLayout>
+
+

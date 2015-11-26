@@ -1,13 +1,24 @@
 package com.cse190sc.streetclash;
 
+import android.content.SharedPreferences;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -39,11 +50,17 @@ public class ProfileViewActivity extends AppCompatActivity {
     private String m_AboutMe;
     private String[] m_Skills;
 
+    //Beacon Code
+    private BeaconTransmitterApplication m_Application;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_view);
         setTitle("Profile");
+
+        //Beacon Code
+        m_Application = (BeaconTransmitterApplication) this.getApplicationContext();
 
         Intent i = getIntent();
         fromEditScreen = i.getBooleanExtra("editScreen", false);
@@ -81,36 +98,49 @@ public class ProfileViewActivity extends AppCompatActivity {
         }
         else if(ownProfile) {
             SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+            String userID = prefs.getString("userID", "invalid");
+
+            JSONObject obj = null;
+            try {
+                obj = new JSONObject("{\"userID\":\""+userID+"\"}");
+                //obj.put("userID", userID);
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.GET,
-                    Constants.SERVER_URL + "/users?userID=" + prefs.getString("userID", "invalid"),
+                    Constants.SERVER_URL + "/users?userID=" + userID,
                     null,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                String name = response.getString("name");
-                                int age = response.getInt("age");
-                                String gender = response.getString("gender");
-                                String about = response.getString("about");
+                                m_Name = response.getString("name");
+                                m_Age = response.getString("age");
+                                m_Gender = response.getString("gender");
+                                m_AboutMe = response.getString("about");
 //                                String email = response.getString("email");
 
                                 JSONArray skillsArray = response.getJSONArray("skills");
-                                String[] skills = new String[skillsArray.length()];
+                                m_Skills = new String[skillsArray.length()];
                                 for (int i = 0; i < skillsArray.length(); i++) {
-                                   skills[i] = (String) skillsArray.get(i);
+                                    m_Skills[i] = (String) skillsArray.get(i);
                                 }
 
-                                nameView.setText(name);
-                                ageView.setText(age);
-                                nameGender.setText(gender);
-                                nameAbout.setText(about);
+                                nameView.setText(m_Name);
+                                ageView.setText(m_Age);
+                                nameGender.setText(m_Gender);
+                                nameAbout.setText(m_AboutMe);
                                 //m_ProfileImage.setImageBitmap(image);
 
-                                ListAdapter adapter = new CustomAdapter(getApplicationContext(), skills);
+                                ListAdapter adapter = new CustomAdapter(getApplicationContext(), m_Skills);
                                 ListView listView = (ListView) findViewById(R.id.listView);
                                 listView.setAdapter(adapter);
                                 ProfileEditActivity.setListViewHeightBasedOnChildren(listView);
+
+                                Log.i(TAG, "Setting up the user fields");
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -119,7 +149,7 @@ public class ProfileViewActivity extends AppCompatActivity {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-
+                            Log.i(TAG, "PVA: Volley Error: " + error.getMessage());
                         }
                     }
             );
@@ -127,14 +157,50 @@ public class ProfileViewActivity extends AppCompatActivity {
             VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
         }
         else {
-
+            Log.i(TAG, "ELSE BLOCK HIT IN PROFILE VIEW ACTIVITY!");
         }
+    }
+
+    public void passFeedButtonClicked(View v) {
+        Log.i(TAG, "PVA: passFeedButton, going to ProfileListActivity");
+        Intent i = new Intent(this, ProfileListActivity.class);
+        startActivity(i);
+    }
+
+    public void optionsButtonClicked(View v) {
+        Log.i(TAG, "PVA: optionsButton, going to OptionsActivity");
+        Intent i = new Intent(this, OptionsActivity.class);
+        startActivity(i);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause()");
+        m_Application.setInsideActivity(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume()");
+        m_Application.setInsideActivity(true);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_profile_view, menu);
+        getMenuInflater().inflate(R.menu.profile_edit, menu);
+
+        if (ownProfile) {
+            menu.findItem(R.id.item_edit).setEnabled(true);
+            Log.i(TAG, "PVA: Edit button true");
+        }
+        else {
+            menu.findItem(R.id.item_edit).setEnabled(false);
+            Log.i(TAG, "PVA: Edit button false");
+        }
+
         return true;
     }
 
@@ -146,7 +212,19 @@ public class ProfileViewActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.item_edit) {
+            Log.i(TAG, "PVA: Edit clicked, going to PEA");
+            Intent i = new Intent(this, ProfileEditActivity.class);
+            i.putExtra("name", m_Name);
+            i.putExtra("age", m_Age);
+            i.putExtra("gender", m_Gender);
+            i.putExtra("about", m_AboutMe);
+            i.putExtra("skills", m_Skills);
+            m_ProfileImage.buildDrawingCache();
+            Bitmap profile = m_ProfileImage.getDrawingCache();
+            i.putExtra("profile_image", profile);
+            i.putExtra("cameFromProfileView", true);
+            startActivity(i);
             return true;
         }
 
