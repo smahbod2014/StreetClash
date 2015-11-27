@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
@@ -38,7 +39,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileEditActivity extends AppCompatActivity {
 
@@ -89,7 +93,8 @@ public class ProfileEditActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (aboutMe.getLayout().getLineCount() > 7) {
+                Layout layout = aboutMe.getLayout();
+                if (layout != null && layout.getLineCount() > 7) {
                     aboutMe.getText().delete(aboutMe.getText().length() - 1, aboutMe.getText().length());
                 }
             }
@@ -139,7 +144,7 @@ public class ProfileEditActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.item_done) {
-            Toast.makeText(this, "Done clicked", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Done clicked", Toast.LENGTH_SHORT).show();
 
             //finalize fields
             //skills list should already be set
@@ -171,15 +176,41 @@ public class ProfileEditActivity extends AppCompatActivity {
             i.putExtra("age", m_Age);
             i.putExtra("gender", m_Gender);
             i.putExtra("about_me", m_AboutMe);
-            i.putExtra("skills", m_Skills);
             i.putExtra("editScreen", true);
-            i.putExtra("ownProfile", false);
+            i.putExtra("ownProfile", true);
+
+            ListView lv = (ListView) findViewById(R.id.listView);
+            ListAdapter la = lv.getAdapter();
+            String[] skills = new String[la.getCount()];
+            for (int k = 0; k < skills.length; k++) {
+                skills[k] = (String) la.getItem(k);
+            }
+            i.putExtra("skills", skills);
 
             //temporary image field
 
 
             //send stuff to server
-            //m_ProfileImage.get
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            profile.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] encoded = stream.toByteArray();
+            String imageAsString = "";
+            byte[] decoded = null;
+            try {
+                imageAsString = new String(encoded, "ISO-8859-1");
+                decoded = imageAsString.getBytes("ISO-8859-1");
+            }
+            catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            for (int a = 0; a < encoded.length; a++) {
+                if (encoded[a] != decoded[a]) {
+                    Log.e(TAG, "Problem with decoding the image bytes! encoded was " + encoded[a] + " while decoded was " + decoded[a]);
+                }
+            }
+
+            Log.i(TAG, "Image length is " + imageAsString.length() + " bytes");
 
             SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
 
@@ -190,14 +221,13 @@ public class ProfileEditActivity extends AppCompatActivity {
                 obj.put("age", m_Age);
                 obj.put("gender", m_Gender);
                 obj.put("about", m_AboutMe);
-                obj.put("image", "temporary");
-//                JSONArray skillsArray = new JSONArray();
+                obj.put("image", imageAsString);
+
                 ArrayList<String> skillsList = new ArrayList<>();
-                for (int index = 0; index < m_Skills.length; index++) {
-//                    skillsArray.put(m_Skills[index]);
-                    skillsList.add(m_Skills[index]);
+                for (int index = 0; index < skills.length; index++) {
+                    skillsList.add(skills[index]);
                 }
-//                obj.put("skills", skillsArray);
+
                 obj.put("skills", new JSONArray(skillsList));
                 obj.put("userID", prefs.getString("userID", "invalid"));
                 Log.i(TAG, obj.toString());
@@ -322,13 +352,16 @@ public class ProfileEditActivity extends AppCompatActivity {
 
         EditText editAbout = (EditText) findViewById(R.id.about_me);
         String about = i.getStringExtra("about");
-        //editAbout.setText(about);
+        editAbout.setText(about);
 
         String[] skills = i.getStringArrayExtra("skills");
         ListAdapter adapter = new CustomAdapter(ProfileEditActivity.this, skills);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
         setListViewHeightBasedOnChildren(listView);
+
+        Bitmap image = i.getExtras().getParcelable("profile_image");
+        m_ProfileImage.setImageBitmap(image);
     }
 
     /* Method for Setting the Height of the ListView dynamically.
@@ -355,5 +388,17 @@ public class ProfileEditActivity extends AppCompatActivity {
         ViewGroup.LayoutParams params = listView.getLayoutParams();
         params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
         listView.setLayoutParams(params);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BeaconTransmitterApplication.enteringApp();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BeaconTransmitterApplication.leavingApp();
     }
 }

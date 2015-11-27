@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,15 +102,6 @@ public class ProfileViewActivity extends AppCompatActivity {
             SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
             String userID = prefs.getString("userID", "invalid");
 
-            JSONObject obj = null;
-            try {
-                obj = new JSONObject("{\"userID\":\""+userID+"\"}");
-                //obj.put("userID", userID);
-            }
-            catch (JSONException e) {
-                e.printStackTrace();
-            }
-
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.GET,
                     Constants.SERVER_URL + "/users?userID=" + userID,
@@ -121,7 +114,6 @@ public class ProfileViewActivity extends AppCompatActivity {
                                 m_Age = response.getString("age");
                                 m_Gender = response.getString("gender");
                                 m_AboutMe = response.getString("about");
-//                                String email = response.getString("email");
 
                                 JSONArray skillsArray = response.getJSONArray("skills");
                                 m_Skills = new String[skillsArray.length()];
@@ -139,6 +131,26 @@ public class ProfileViewActivity extends AppCompatActivity {
                                 ListView listView = (ListView) findViewById(R.id.listView);
                                 listView.setAdapter(adapter);
                                 ProfileEditActivity.setListViewHeightBasedOnChildren(listView);
+
+                                String imageAsString = response.getString("image");
+                                if (imageAsString.equals("temporary")) {
+                                    Log.i(TAG, "Image was temporary!");
+                                    m_ProfileImage.setImageResource(R.mipmap.default_profile_pic);
+                                }
+                                else {
+                                    byte[] decoded = null;
+                                    try {
+                                        decoded = imageAsString.getBytes("ISO-8859-1");
+                                    }
+                                    catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
+                                    m_ProfileImage.setImageBitmap(
+                                            BitmapFactory.decodeByteArray(
+                                                    decoded,
+                                                    0,
+                                                    imageAsString.length()));
+                                }
 
                                 Log.i(TAG, "Setting up the user fields");
                             } catch (JSONException e) {
@@ -174,17 +186,15 @@ public class ProfileViewActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        Log.i(TAG, "onPause()");
-        m_Application.setInsideActivity(false);
+    protected void onResume() {
+        super.onResume();
+        BeaconTransmitterApplication.enteringApp();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Log.i(TAG, "onResume()");
-        m_Application.setInsideActivity(true);
+    protected void onPause() {
+        super.onPause();
+        BeaconTransmitterApplication.leavingApp();
     }
 
     @Override

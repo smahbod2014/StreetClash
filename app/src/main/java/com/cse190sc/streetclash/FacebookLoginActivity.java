@@ -106,6 +106,21 @@ public class FacebookLoginActivity extends AppCompatActivity
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_facebook_login);
 
+//        These two lines were for testing!
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                BeaconTransmitterApplication app = (BeaconTransmitterApplication) FacebookLoginActivity.this.getApplicationContext();
+//                app.createNotification();
+//            }
+//        }).start();
+
+
         /**********************************************************************
          * 1. Initialize FacebookSDK
          * 2. Initialize CallbackManager
@@ -533,6 +548,8 @@ public class FacebookLoginActivity extends AppCompatActivity
 
         //Logs install and app activate Appp Events.
         AppEventsLogger.activateApp(this);
+
+        BeaconTransmitterApplication.enteringApp();
     }
 
     @Override
@@ -541,6 +558,8 @@ public class FacebookLoginActivity extends AppCompatActivity
 
         //Log app deactivate App Event
         AppEventsLogger.deactivateApp(this);
+
+        BeaconTransmitterApplication.leavingApp();
     }
 }
 

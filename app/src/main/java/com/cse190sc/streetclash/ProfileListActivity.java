@@ -88,17 +88,15 @@ public class ProfileListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        Log.i(TAG, "onPause()");
-        m_Application.setInsideActivity(false);
+    protected void onResume() {
+        super.onResume();
+        BeaconTransmitterApplication.enteringApp();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Log.i(TAG, "onResume()");
-        m_Application.setInsideActivity(true);
+    protected void onPause() {
+        super.onPause();
+        BeaconTransmitterApplication.leavingApp();
     }
 
     private void updateUI(){

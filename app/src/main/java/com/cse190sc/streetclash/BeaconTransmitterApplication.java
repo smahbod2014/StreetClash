@@ -1,6 +1,7 @@
 package com.cse190sc.streetclash;
 
 import android.app.Application;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -8,6 +9,7 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -42,6 +44,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     private BeaconTransmitter m_Transmitter;
     private boolean m_InsideActivity;
     private boolean m_IsScanning = true;
+    private static boolean s_ApplicationInBackground;
     private Region m_Region;
     private final HashMap<Identifier, Long> m_BeaconMap = new HashMap<>();
 
@@ -63,12 +66,12 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                             //first time seeing this beacon
                             if(m_BeaconMap.get(beacon.getId2()) == null) {
                                 //createNotification();
-                                if (m_InsideActivity) {
-                                    Log.d(TAG, "No need to send a notification, app is in foreground");
-                                }
-                                else {
+                                if (isAppInBackground()) {
                                     Log.d(TAG, "Sending notification!");
                                     createNotification();
+                                }
+                                else {
+                                    Log.d(TAG, "No need to send a notification, app is in foreground");
                                 }
                             }
                             m_BeaconMap.put(beacon.getId2(), System.currentTimeMillis());
@@ -170,9 +173,16 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         }
     }
 
-    public void setInsideActivity(boolean insideActivity) {
-        m_InsideActivity = insideActivity;
-        Log.d(TAG, "m_InsideActivity is now " + m_InsideActivity);
+    public static boolean isAppInBackground() {
+        return s_ApplicationInBackground;
+    }
+
+    public static void leavingApp() {
+        s_ApplicationInBackground = true;
+    }
+
+    public static void enteringApp() {
+        s_ApplicationInBackground = false;
     }
 
     /**
@@ -180,13 +190,16 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
      * It's also configured so that when the user opens and clicks on the notification,
      * the ProfileListActivity activity will be launched.
      */
-    private void createNotification() {
+    public void createNotification() {
+        int yellow = 0xffffff00;
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
-                        .setContentTitle("Beacon Transmitter Application")
+                        .setContentTitle("StreetClash")
                         .setContentText("Congratulations! Found a beacon while not in-app!")
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setAutoCancel(true);
+                        .setAutoCancel(true)
+                        .setVibrate(new long[] {0, 125, 125, 125})
+                        .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         Intent i = new Intent(this, ProfileListActivity.class);

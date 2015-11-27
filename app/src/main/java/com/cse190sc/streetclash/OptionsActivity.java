@@ -96,20 +96,6 @@ public class OptionsActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.i(TAG, "onPause()");
-        m_Application.setInsideActivity(false);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.i(TAG, "onResume()");
-        m_Application.setInsideActivity(true);
-    }
-
     private void doPermissionChecks() {
         //this huge block of code is to let this work on phones running
         //Android 6.0, like my Nexus 5
@@ -165,5 +151,17 @@ public class OptionsActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BeaconTransmitterApplication.enteringApp();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BeaconTransmitterApplication.leavingApp();
     }
 }
