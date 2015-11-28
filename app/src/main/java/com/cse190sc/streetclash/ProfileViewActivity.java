@@ -98,9 +98,15 @@ public class ProfileViewActivity extends AppCompatActivity {
             listView.setAdapter(adapter);
             ProfileEditActivity.setListViewHeightBasedOnChildren(listView);
         }
-        else if(ownProfile) {
-            SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
-            String userID = prefs.getString("userID", "invalid");
+        else /*ownProfile OR other user's profile*/ {
+            String userID = "";
+            if (ownProfile) {
+                SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+                userID = prefs.getString("userID", "invalid");
+            }
+            else {
+                userID = i.getStringExtra("userID");
+            }
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.GET,
@@ -167,9 +173,8 @@ public class ProfileViewActivity extends AppCompatActivity {
             );
 
             VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
-        }
-        else {
-            Log.i(TAG, "ELSE BLOCK HIT IN PROFILE VIEW ACTIVITY!");
+
+
         }
     }
 

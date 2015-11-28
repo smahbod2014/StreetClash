@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="444dp"
+        android:id="@+id/scrollView">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Enable Tranmission"
+            android:id="@+id/ao_tv1"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"/>
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ao_transmitSwitch"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:checked="false"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Skills Filtering"
+            android:id="@+id/ao_tv2"
+            android:layout_below="@+id/ao_tv5"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="5dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit &quot;All&quot;"
+            android:id="@+id/ao_btnChangeFiltersAll"
+            android:onClick="changeFiltersAllClicked"
+            android:layout_alignBottom="@+id/ao_tv2"
+            android:layout_toEndOf="@+id/ao_tv2"
+            android:layout_marginBottom="-15dp"
+            android:layout_marginLeft="5dp"
+            android:nestedScrollingEnabled="false"/>
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ao_skillsFilteringAll"
+            android:layout_alignStart="@+id/ao_tv2"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:layout_below="@+id/ao_tv3"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Has all of"
+            android:id="@+id/ao_tv3"
+            android:layout_below="@+id/ao_btnChangeFiltersAll"
+            android:layout_alignStart="@+id/ao_skillsFilteringAll"
+            android:layout_marginTop="5dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Has any of"
+            android:id="@+id/ao_tv4"
+            android:layout_below="@id/ao_skillsFilteringAll"
+            android:layout_alignStart="@+id/ao_skillsFilteringAll"
+            android:layout_marginTop="20dp"/>
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ao_skillsFilteringAny"
+            android:layout_below="@id/ao_tv4"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:layout_alignStart="@+id/ao_tv4"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit &quot;Any&quot;"
+            android:id="@+id/ao_btnChangeFiltersAny"
+            android:layout_alignLeft="@id/ao_btnChangeFiltersAll"
+            android:layout_alignTop="@+id/ao_btnChangeFiltersAll"
+            android:layout_marginLeft="100dp"
+            android:onClick="changeFiltersAnyClicked"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Skills Filtering To Use"
+            android:id="@+id/ao_tv5"
+            android:layout_below="@+id/ao_tv1"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="20dp"/>
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ao_filteringSpinner"
+            android:layout_below="@+id/ao_tv1"
+            android:layout_alignStart="@+id/ao_btnChangeFiltersAny"
+            android:spinnerMode="dropdown"
+            android:entries="@array/filtering_array"
+            android:layout_marginTop="20dp"/>
+
+    </RelativeLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="64dp">
+
+        <ImageButton
+            android:layout_width="135dp"
+            android:layout_height="62dp"
+            android:id="@+id/imageButton2"
+            android:layout_weight="0.26"
+            android:layout_marginLeft="-4dp"
+            android:src="@mipmap/feed"
+            android:scaleType="fitCenter"
+            android:onClick="passFeedButtonClicked"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/ao_skillsFilteringAll"/>
+
+        <ImageButton
+            android:layout_width="135dp"
+            android:layout_height="62dp"
+            android:id="@+id/imageButton3"
+            android:layout_weight="0.26"
+            android:layout_marginLeft="-6dp"
+            android:src="@mipmap/profile"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="false"
+            android:onClick="profileButtonClicked"
+            android:layout_alignParentBottom="true"
+            android:layout_alignEnd="@+id/ao_btnChangeFiltersAll"/>
+
+        <ImageButton
+            android:layout_width="135dp"
+            android:layout_height="62dp"
+            android:id="@+id/imageButton4"
+            android:layout_marginLeft="-6dp"
+            android:src="@mipmap/wrench"
+            android:scaleType="fitCenter"
+            android:layout_alignParentBottom="true"
+            android:layout_alignEnd="@+id/ao_skillsFilteringAll"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -48,7 +48,7 @@ public class ProfileEditActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileEditActivity";
     private static final int REQUEST_LOAD_IMAGE = 1;
-    private static final String[] SKILL_CARDS = {
+    public static final String[] SKILL_CARDS = {
             "Comp Sci", "Economics", "Electrical Eng", "Accounting",
             "Math", "Crypto", "Human Bio", "Bioinfo", "Robotics",
             "Dentistry", "Music", "Drawing/Art", "Dance", "Theater",
@@ -214,6 +214,9 @@ public class ProfileEditActivity extends AppCompatActivity {
 
             SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
 
+            // THIS IS A TEST LINE, REMOVE IT WHEN DONE
+//            ((BeaconTransmitterApplication) this.getApplicationContext()).createEntry(m_Name, imageAsString, prefs.getString("userID", "invalid"));
+
             JSONObject obj = null;
             try {
                 obj = new JSONObject();
@@ -240,6 +243,7 @@ public class ProfileEditActivity extends AppCompatActivity {
             if (prefs.getBoolean("newUser", true)) {
                 method = Request.Method.POST;
                 Log.i(TAG, "Using POST in ProfileEditActivity");
+                prefs.edit().putBoolean("newUser", false).apply();
             }
             else {
                 Log.i(TAG, "Using PUT in ProfileEditActivity");

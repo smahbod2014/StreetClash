@@ -147,7 +147,10 @@ public class FacebookLoginActivity extends AppCompatActivity
                      *****************************************************************/
                     @Override
                     public void onSuccess(LoginResult loginResult) {
-                        String userID = loginResult.getAccessToken().getUserId();
+//                        String tempID = loginResult.getAccessToken().getUserId().substring(0, 5);
+//                        int tempIDint = Integer.parseInt(tempID) / 9;
+                        final String userID = loginResult.getAccessToken().getUserId()
+                                .substring(0, 4);
                         String tokenID = loginResult.getAccessToken().getToken();
                         Log.e("StreetClash", "onSuccess : ID = " +
                                 userID + "\nToken = " + tokenID);
@@ -177,6 +180,12 @@ public class FacebookLoginActivity extends AppCompatActivity
                                 new Response.Listener<JSONObject>() {
                                     @Override
                                     public void onResponse(JSONObject response) {
+                                        // set the beacon id, very important if this app is going to work at all
+                                        BeaconTransmitterApplication app =
+                                                (BeaconTransmitterApplication) FacebookLoginActivity.this.getApplicationContext();
+                                        app.setBeaconIdentifier(userID);
+
+                                        Log.i("StreetClash", "Setting beacon ID to " + userID);
                                         if (response.has("newUser")) {
                                             //we are a new user
                                             Log.i("StreetClash", "Facebook: New user!");

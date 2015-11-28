@@ -1,18 +1,10 @@
 package com.cse190sc.streetclash;
 
 
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,22 +17,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
-
-/*public class ProfileListActivity extends SingleFragmentActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setTitle("Pass Feed");
-    }
-
-    @Override
-    protected Fragment createFragment(){
-        return new ProfileListFragment();
-    }
-}*/
 
 public class ProfileListActivity extends AppCompatActivity {
     private RecyclerView mProfileRecyclerView;
@@ -49,7 +28,6 @@ public class ProfileListActivity extends AppCompatActivity {
 
     //Beacon Stuff
     private static final String TAG = "ProfileListActivity";
-    private BeaconTransmitterApplication m_Application;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -60,20 +38,20 @@ public class ProfileListActivity extends AppCompatActivity {
         mProfileRecyclerView = (RecyclerView) findViewById(R.id.profile_recycler_view);
         mProfileRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        ((BeaconTransmitterApplication) this.getApplicationContext()).setProfileListActivity(this);
+
         updateUI();
 
-        m_Application = (BeaconTransmitterApplication) this.getApplicationContext();
 
-        boolean b = this.getIntent().getBooleanExtra("arrivedFromNotification", false);
-        if (b) {
-            Toast.makeText(this, "Arrived from notification", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Came from notification");
-        }
-        else {
-            Toast.makeText(this, "Opened app manually", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Opened app manually");
-        }
-
+//        boolean b = this.getIntent().getBooleanExtra("arrivedFromNotification", false);
+//        if (b) {
+//            Toast.makeText(this, "Arrived from notification", Toast.LENGTH_SHORT).show();
+//            Log.d(TAG, "Came from notification");
+//        }
+//        else {
+//            Toast.makeText(this, "Opened app manually", Toast.LENGTH_SHORT).show();
+//            Log.d(TAG, "Opened app manually");
+//        }
     }
 
     public void profileButtonClicked(View v) {
@@ -82,6 +60,7 @@ public class ProfileListActivity extends AppCompatActivity {
         i.putExtra("ownProfile", true);
         startActivity(i);
     }
+
     public void optionsButtonClicked(View v) {
         Intent i = new Intent(this, OptionsActivity.class);
         startActivity(i);
@@ -99,11 +78,17 @@ public class ProfileListActivity extends AppCompatActivity {
         BeaconTransmitterApplication.leavingApp();
     }
 
-    private void updateUI(){
-        ProfileLib profileLib = ProfileLib.get(this);
-        List<Profile> profiles = profileLib.getProfile();
+    public void notifyChanged() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+    }
 
-        mAdapter = new ProfileAdapter(profiles);
+    private void updateUI(){
+        mAdapter = new ProfileAdapter(BeaconTransmitterApplication.getProfileListEntries());
         mProfileRecyclerView.setAdapter(mAdapter);
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mAdapter);
         mItemTouchHelper = new ItemTouchHelper(callback);
@@ -111,7 +96,7 @@ public class ProfileListActivity extends AppCompatActivity {
     }
 
     private class ProfileHolder extends RecyclerView.ViewHolder implements
-            ItemTouchHelperViewHolder{
+            ItemTouchHelperViewHolder, View.OnClickListener {
         private TextView mNameView;
         private ImageView mPhotoView;
 
@@ -119,7 +104,7 @@ public class ProfileListActivity extends AppCompatActivity {
 
         public ProfileHolder(View itemView){
             super(itemView);
-            //itemView.setOnClickListener(this);
+            itemView.setOnClickListener(this);
 
             mNameView = (TextView) itemView.findViewById(R.id.list_item_profile_name_text_view);
             mPhotoView = (ImageView) itemView.findViewById(R.id.list_item_profile_photo_image_view);
@@ -127,17 +112,41 @@ public class ProfileListActivity extends AppCompatActivity {
 
         public void bindProfile (Profile profile){
             mProfile = profile;
-            mNameView.setText(mProfile.getMname());
+            mNameView.setText(mProfile.name);
             //mPhotoView.setImageDrawable(null);
+
+            if (mProfile.imageBytes.equals("temporary")) {
+                mPhotoView.setImageResource(R.mipmap.default_profile_pic);
+            }
+            else {
+                byte[] decoded = null;
+                try {
+                    decoded = mProfile.imageBytes.getBytes("ISO-8859-1");
+                }
+                catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                mPhotoView.setImageBitmap(
+                        BitmapFactory.decodeByteArray(
+                                decoded,
+                                0,
+                                mProfile.imageBytes.length()));
+            }
         }
 
-        /*@Override*/
-        /*public void onClick(View v){
-            Toast.makeText(getActivity(), mProfile.getMname() + "clicked!", Toast.LENGTH_SHORT).show();
-        }*/
+        @Override
+        public void onClick(View v) {
+            Intent i = new Intent(ProfileListActivity.this, ProfileViewActivity.class);
+            i.putExtra("editScreen", false);
+            i.putExtra("ownProfile", false);
+            i.putExtra("userID", mProfile.userID);
+            startActivity(i);
+        }
+
         @Override
         public void onItemSelected() {
             itemView.setBackgroundColor(Color.LTGRAY);
+
         }
 
         @Override
@@ -194,8 +203,5 @@ public class ProfileListActivity extends AppCompatActivity {
             notifyItemMoved(fromPosition, toPosition);
             return true;
         }
-
-
     }
-
 }

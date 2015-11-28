@@ -65,13 +65,13 @@ public class ProfileListFragment extends Fragment{
 
         public void bindProfile (Profile profile){
             mProfile = profile;
-            mNameView.setText(mProfile.getMname());
+            mNameView.setText(mProfile.name);
             //mPhotoView.setImageDrawable(null);
         }
 
         /*@Override*/
         /*public void onClick(View v){
-            Toast.makeText(getActivity(), mProfile.getMname() + "clicked!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), mProfile.getName() + "clicked!", Toast.LENGTH_SHORT).show();
         }*/
         @Override
         public void onItemSelected() {

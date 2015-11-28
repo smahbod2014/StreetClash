@@ -9,9 +9,14 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
-import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import com.android.volley.ExecutorDelivery;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
@@ -23,6 +28,9 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.beacon.startup.RegionBootstrap;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +46,8 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     private static final String TAG = "BeaconTransmitterApp";
     private static final String ALTBEACON_ID = "2F234454-CF6D-4A0F-ADF2-F4911BA9FFA6";
     private static final long TIMEOUT = 10l * 1000l;
+    public static final int FILTERING_ALL = 0;
+    public static final int FILTERING_ANY = 1;
     private RegionBootstrap m_RegionBootstrap;
     private BackgroundPowerSaver m_PowerSaver;
     private BeaconManager m_BeaconManager;
@@ -45,8 +55,13 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     private boolean m_InsideActivity;
     private boolean m_IsScanning = true;
     private static boolean s_ApplicationInBackground;
+    private static String[] s_SkillsFilterAll = new String[1];
+    private static String[] s_SkillsFilterAny = new String[1];
+    private static int s_FilteringMode = FILTERING_ALL;
     private Region m_Region;
     private final HashMap<Identifier, Long> m_BeaconMap = new HashMap<>();
+    private static final ArrayList<Profile> s_ProfileListEntries = new ArrayList<>();
+    private ProfileListActivity m_ProfileListActivity;
 
     @Override
     public void onCreate() {
@@ -65,14 +80,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                         synchronized (m_BeaconMap) {
                             //first time seeing this beacon
                             if(m_BeaconMap.get(beacon.getId2()) == null) {
-                                //createNotification();
-                                if (isAppInBackground()) {
-                                    Log.d(TAG, "Sending notification!");
-                                    createNotification();
-                                }
-                                else {
-                                    Log.d(TAG, "No need to send a notification, app is in foreground");
-                                }
+                                handleBeaconSighting(beacon.getId2());
                             }
                             m_BeaconMap.put(beacon.getId2(), System.currentTimeMillis());
                         }
@@ -137,7 +145,25 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         }).start();
     }
 
+    public void setBeaconIdentifier(String id) {
+        boolean wasTransmitting = m_Transmitter.isStarted();
+        if (wasTransmitting) {
+            m_Transmitter.stopAdvertising();
+        }
 
+        m_Transmitter.setBeacon(new Beacon.Builder()
+                .setId1("2F234454-CF6D-4A0F-ADF2-F4911BA9FFA6")
+                .setId2(id)
+                .setId3("987")
+                .setManufacturer(0x0000) // Choose a number of 0x00ff or less as some devices cannot detect beacons with a manufacturer code > 0x00ff
+                .setTxPower(-59)
+                .setDataFields(Arrays.asList(new Long[]{0l}))
+                .build());
+
+        if (wasTransmitting) {
+            m_Transmitter.startAdvertising();
+        }
+    }
     @Override
     public void didEnterRegion(Region region) {
         Log.d(TAG, "I see a beacon!");
@@ -253,5 +279,129 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
     public BeaconTransmitter getTransmitter() {
         return m_Transmitter;
+    }
+
+    public static void setSkillsFilterAll(String[] skillsFilter) {
+        s_SkillsFilterAll = skillsFilter;
+    }
+
+    public static void setSkillsFilterAny(String[] skillsFilter) {
+        s_SkillsFilterAny = skillsFilter;
+    }
+
+    public static void setFilteringMode(int mode) {
+        s_FilteringMode = mode;
+    }
+
+    private void handleBeaconSighting(Identifier id) {
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                Constants.SERVER_URL + "/users?userID=" + id.toString(),
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray skillsArray = response.getJSONArray("skills");
+                            ArrayList<String> skills = new ArrayList<>();
+                            for (int i = 0; i < skillsArray.length(); i++) {
+                                skills.add((String) skillsArray.get(i));
+                            }
+
+                            boolean success = true;
+                            // using FILTERING_ALL mode
+                            if (s_FilteringMode == FILTERING_ALL) {
+                                for (int i = 0; i < s_SkillsFilterAll.length; i++) {
+                                    if (!skills.contains(s_SkillsFilterAll[i])) {
+                                        success = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            // using FILTERING_ANY mode
+                            else if (s_FilteringMode == FILTERING_ANY) {
+                                success = false;
+                                for (int i = 0; i < s_SkillsFilterAll.length; i++) {
+                                    if (skills.contains(s_SkillsFilterAll[i])) {
+                                        success = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // yes! notify us about this user
+                            if (success) {
+                                notifyAboutUser(
+                                        response.getString("name"),
+                                        response.getString("image"),
+                                        response.getString("userID"));
+                            }
+                        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "[BTA] Volley error: " + error.getMessage());
+                    }
+                }
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
+    private void notifyAboutUser(String name, String imageBytes, String userID) {
+        if (isAppInBackground()) {
+            Log.d(TAG, "Sending notification!");
+            createNotification();
+        }
+        else {
+            Log.d(TAG, "No need to send a notification, app is in foreground");
+        }
+
+        // we create a profile list entry anyway to put in the ProfileListActivity
+        // This will happen regardless of whether we're in the app or not
+        Profile entry = new Profile(name, userID, imageBytes);
+        s_ProfileListEntries.add(entry);
+        if (m_ProfileListActivity != null) {
+            m_ProfileListActivity.notifyChanged();
+        }
+    }
+
+    // this is a temporary test method. delete it!
+    public void createEntry(String name, String imageBytes, String userID) {
+        final Profile entry = new Profile(name, userID, imageBytes);
+        s_ProfileListEntries.add(entry);
+        if (m_ProfileListActivity != null) {
+            m_ProfileListActivity.notifyChanged();
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                s_ProfileListEntries.add(entry);
+                if (m_ProfileListActivity != null) {
+                    m_ProfileListActivity.notifyChanged();
+                }
+            }
+        }).start();
+    }
+
+    public static ArrayList<Profile> getProfileListEntries() {
+        return s_ProfileListEntries;
+    }
+
+    public void setProfileListActivity(ProfileListActivity activity) {
+        m_ProfileListActivity = activity;
     }
 }

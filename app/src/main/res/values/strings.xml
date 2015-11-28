@@ -6,6 +6,11 @@
         <item>Other</item>
         <item>Unspecified</item>
     </string-array>
+    <string-array name="filtering_array">
+        <item>All of</item>
+        <item>Any of</item>
+    </string-array>
+
     <string name="title_activity_profile">ProfileActivity</string>
 
     <string name="hello_world">Hello world!</string>
