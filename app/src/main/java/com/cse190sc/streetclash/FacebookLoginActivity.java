@@ -69,6 +69,7 @@ import static android.Manifest.permission.READ_CONTACTS;
  *****************************************************************************/
 public class FacebookLoginActivity extends AppCompatActivity
         implements LoaderCallbacks<Cursor> {
+    private static final Object lock = new Object();
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -120,7 +121,6 @@ public class FacebookLoginActivity extends AppCompatActivity
 //            }
 //        }).start();
 
-
         /**********************************************************************
          * 1. Initialize FacebookSDK
          * 2. Initialize CallbackManager
@@ -155,62 +155,55 @@ public class FacebookLoginActivity extends AppCompatActivity
                         Log.e("StreetClash", "onSuccess : ID = " +
                                 userID + "\nToken = " + tokenID);
 
-//                        final AccessToken accessToken = loginResult.getAccessToken();
-//                        GraphRequestAsyncTask request = GraphRequest.newMeRequest(accessToken, new GraphRequest.GraphJSONObjectCallback() {
-//                            @Override
-//                            public void onCompleted(JSONObject user, GraphResponse graphResponse) {
-//                                Log.i("StreetClash", "email = " + user.optString("email"));
-//                                Log.i("StreetClash", "name = " + user.optString("name"));
-//                                Log.i("StreetClash", "user id = " + user.optString("id"));
-//                                Log.i("StreetClash", "Server url = " + Constants.SERVER_URL + "/facebook");
-//
-//                                String email = user.optString("email");
-//
-//                            }
-//                        }).executeAsync();
+                        final AccessToken accessToken = loginResult.getAccessToken();
+                        GraphRequestAsyncTask r = GraphRequest.newMeRequest(accessToken, new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(final JSONObject user, GraphResponse graphResponse) {
+                                final SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash",
+                                        Context.MODE_PRIVATE);
+                                prefs.edit().putString("userID", userID).apply();
 
-                        final SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash",
-                                Context.MODE_PRIVATE);
-                        prefs.edit().putString("userID", userID).apply();
+                                JsonObjectRequest request = new JsonObjectRequest(
+                                        Request.Method.GET,
+                                        Constants.SERVER_URL + "/users/facebook?userID=" + userID,
+                                        null,
+                                        new Response.Listener<JSONObject>() {
+                                            @Override
+                                            public void onResponse(JSONObject response) {
+                                                // set the beacon id, very important if this app is going to work at all
+                                                BeaconTransmitterApplication app =
+                                                        (BeaconTransmitterApplication) FacebookLoginActivity.this.getApplicationContext();
+                                                app.setBeaconIdentifier(userID);
 
-                        JsonObjectRequest request = new JsonObjectRequest(
-                                Request.Method.GET,
-                                Constants.SERVER_URL + "/users/facebook?userID=" + userID,
-                                null,
-                                new Response.Listener<JSONObject>() {
-                                    @Override
-                                    public void onResponse(JSONObject response) {
-                                        // set the beacon id, very important if this app is going to work at all
-                                        BeaconTransmitterApplication app =
-                                                (BeaconTransmitterApplication) FacebookLoginActivity.this.getApplicationContext();
-                                        app.setBeaconIdentifier(userID);
-
-                                        Log.i("StreetClash", "Setting beacon ID to " + userID);
-                                        if (response.has("newUser")) {
-                                            //we are a new user
-                                            Log.i("StreetClash", "Facebook: New user!");
-                                            Intent i = new Intent(getApplicationContext(), ProfileEditActivity.class);
-                                            prefs.edit().putBoolean("newUser", true).apply();
-                                            startActivity(i);
-                                            finish();
+                                                Log.i("StreetClash", "Setting beacon ID to " + userID);
+                                                if (response.has("newUser")) {
+                                                    //we are a new user
+                                                    Log.i("StreetClash", "Facebook: New user!");
+                                                    Intent i = new Intent(getApplicationContext(), ProfileEditActivity.class);
+                                                    i.putExtra("facebookName", user.optString("name", "Enter name here"));
+                                                    prefs.edit().putBoolean("newUser", true).apply();
+                                                    startActivity(i);
+                                                    finish();
+                                                }
+                                                else {
+                                                    prefs.edit().putBoolean("newUser", false).apply();
+                                                    Intent i = new Intent(getApplicationContext(), ProfileListActivity.class);
+                                                    startActivity(i);
+                                                    finish();
+                                                }
+                                            }
+                                        },
+                                        new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                Log.e("StreetClash", "Volley error + : " + error.getMessage());
+                                            }
                                         }
-                                        else {
-                                            prefs.edit().putBoolean("newUser", false).apply();
-                                            Intent i = new Intent(getApplicationContext(), ProfileListActivity.class);
-                                            startActivity(i);
-                                            finish();
-                                        }
-                                    }
-                                },
-                                new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        Log.e("StreetClash", "Volley error + : " + error.getMessage());
-                                    }
-                                }
-                        );
+                                );
 
-                        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
+                                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
+                            }
+                        }).executeAsync();
 
 
                         //make request to server sending userid

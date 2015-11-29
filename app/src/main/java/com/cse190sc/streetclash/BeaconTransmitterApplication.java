@@ -8,6 +8,7 @@ import android.app.TaskStackBuilder;
 import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -53,7 +54,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     private BeaconManager m_BeaconManager;
     private BeaconTransmitter m_Transmitter;
     private boolean m_InsideActivity;
-    private boolean m_IsScanning = true;
+    private boolean m_IsScanning = false;
     private static boolean s_ApplicationInBackground;
     private static String[] s_SkillsFilterAll = new String[1];
     private static String[] s_SkillsFilterAny = new String[1];
@@ -99,10 +100,10 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         //m_PowerSaver = new BackgroundPowerSaver(this);
         Log.d(TAG, "Begin monitoring");
         m_Region = new Region("com.cse190sc.streetclash", Identifier.parse(ALTBEACON_ID), null, null);
-        m_RegionBootstrap = new RegionBootstrap(this, m_Region);
+//        m_RegionBootstrap = new RegionBootstrap(this, m_Region);
         m_PowerSaver = new BackgroundPowerSaver(this);
 
-        stopScanning();
+//        stopScanning();
         m_Transmitter = new BeaconTransmitter(this, new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
         m_Transmitter.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
         m_Transmitter.setAdvertiseTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM);
@@ -221,7 +222,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setContentTitle("StreetClash")
-                        .setContentText("Congratulations! Found a beacon while not in-app!")
+                        .setContentText("You just found someone!")
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setAutoCancel(true)
                         .setVibrate(new long[] {0, 125, 125, 125})
@@ -254,9 +255,14 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
     public void startScanning() {
         try {
-            if (!m_IsScanning) {
+            if (m_RegionBootstrap == null) {
+                m_RegionBootstrap = new RegionBootstrap(this, m_Region);
+                m_IsScanning = true;
+            }
+            else if (!m_IsScanning) {
                 m_BeaconManager.startMonitoringBeaconsInRegion(m_Region);
                 m_IsScanning = true;
+                Log.e(TAG, "Scanning started");
             }
         }
         catch (RemoteException e) {
@@ -270,6 +276,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                 m_BeaconManager.stopMonitoringBeaconsInRegion(m_Region);
                 m_BeaconManager.stopRangingBeaconsInRegion(m_Region);
                 m_IsScanning = false;
+                Log.e(TAG, "Scanning stopped");
             }
         }
         catch (RemoteException e) {

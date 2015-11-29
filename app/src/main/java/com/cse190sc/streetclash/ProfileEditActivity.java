@@ -102,6 +102,11 @@ public class ProfileEditActivity extends AppCompatActivity {
 
         m_Skills = new String[0];
 
+        EditText nameField = (EditText) findViewById(R.id.et_name);
+        if (getIntent().hasExtra("facebookName")) {
+            nameField.setText(getIntent().getStringExtra("facebookName"));
+        }
+
         if (getIntent().hasExtra("cameFromProfileView"))
             populateFields();
     }
