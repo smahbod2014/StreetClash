@@ -46,14 +46,14 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
     private static final String TAG = "BeaconTransmitterApp";
     private static final String ALTBEACON_ID = "2F234454-CF6D-4A0F-ADF2-F4911BA9FFA6";
-    private static final long TIMEOUT = 10l * 1000l;
+    private static final long TIMEOUT = 10 * 700;
     public static final int FILTERING_ALL = 0;
     public static final int FILTERING_ANY = 1;
+    public static final double MAX_DISTANCE = 2.0;
     private RegionBootstrap m_RegionBootstrap;
     private BackgroundPowerSaver m_PowerSaver;
     private BeaconManager m_BeaconManager;
     private BeaconTransmitter m_Transmitter;
-    private boolean m_InsideActivity;
     private boolean m_IsScanning = false;
     private static boolean s_ApplicationInBackground;
     private static String[] s_SkillsFilterAll = new String[1];
@@ -78,13 +78,20 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                 if (collection.size() > 0) {
                     StringBuilder sb = new StringBuilder();
                     for (Beacon beacon : collection) {
+                        if (beacon.getDistance() > MAX_DISTANCE)
+                            continue;
+
                         synchronized (m_BeaconMap) {
                             //first time seeing this beacon
-                            if(m_BeaconMap.get(beacon.getId2()) == null) {
+                            if (m_BeaconMap.get(beacon.getId2()) == null) {
                                 handleBeaconSighting(beacon.getId2(), beacon.getDistance());
                             }
+
                             m_BeaconMap.put(beacon.getId2(), System.currentTimeMillis());
                         }
+
+                        updateAllEntriesDistance(beacon.getId2(), beacon.getDistance());
+
                         sb.append("Beacon with id2 = " + beacon.getId2() + " is " + beacon.getDistance() + " meters away");
                         sb.append("\n");
                     }
@@ -116,6 +123,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                 .setDataFields(Arrays.asList(new Long[]{0l}))
                 .build());
 
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -129,8 +137,24 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                             }
                         }
 
+                        boolean changed = false;
                         for (int i = 0; i < idsToRemove.size(); i++) {
                             m_BeaconMap.remove(idsToRemove.get(i));
+                            String userID = idsToRemove.get(i).toString();
+
+                            for (int j = 0; j < s_ProfileListEntries.size(); j++) {
+                                Profile p = s_ProfileListEntries.get(j);
+                                if (p.userID.equals(userID)) {
+                                    // this user is no longer in range
+                                    p.inRange = false;
+                                    changed = true;
+                                    Log.e(TAG, "We see that userID " + userID + " went out of range");
+                                }
+                            }
+                        }
+
+                        if (m_ProfileListActivity != null && changed) {
+                            m_ProfileListActivity.notifyChanged();
                         }
 
                         //logNumBeacons();
@@ -144,6 +168,67 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                 }
             }
         }).start();
+    }
+
+    private void updateAllEntriesDistance(Identifier id, double distance) {
+        final String userID = id.toString();
+        boolean changed = false;
+        for (int i = 0; i < s_ProfileListEntries.size(); i++) {
+            final Profile p = s_ProfileListEntries.get(i);
+            if (p.userID.equals(userID)) {
+                p.distance = distance;
+                changed = true;
+
+                JsonObjectRequest req = new JsonObjectRequest(
+                        Request.Method.GET,
+                        Constants.SERVER_URL + "/users?userID=" + userID,
+                        null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    String name = response.getString("name");
+                                    String imageBytes = response.getString("image");
+                                    if (!p.name.equals(name) || !p.imageBytes.equals(imageBytes)) {
+                                        //the user has changed their stuff!
+                                        p.name = name;
+                                        p.imageBytes = imageBytes;
+                                        Log.i(TAG, "Remote user " + userID + " has changed their info! Updating");
+
+                                        if (m_ProfileListActivity != null) {
+                                            m_ProfileListActivity.notifyChanged();
+                                        }
+                                    }
+
+                                    JSONArray skillsArray = response.getJSONArray("skills");
+                                    ArrayList<String> skills = new ArrayList<>();
+                                    for (int i = 0; i < skillsArray.length(); i++) {
+                                        skills.add((String) skillsArray.get(i));
+                                    }
+
+                                    if (!skillsFilterMatch(skills)) {
+                                        // notify if this is the first time it's a match
+                                    }
+                                }
+                                catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                            }
+                        }
+                );
+            }
+        }
+
+
+        if (m_ProfileListActivity != null && changed) {
+            m_ProfileListActivity.notifyChanged();
+        }
     }
 
     public void setBeaconIdentifier(String id) {
@@ -301,6 +386,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     }
 
     private void handleBeaconSighting(Identifier id, final double distance) {
+        Log.e(TAG, "Handling beacon sighting for userID = " + id.toString() + " at distance ~" + distance);
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
                 Constants.SERVER_URL + "/users?userID=" + id.toString(),
@@ -328,8 +414,8 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                             // using FILTERING_ANY mode
                             else if (s_FilteringMode == FILTERING_ANY) {
                                 success = false;
-                                for (int i = 0; i < s_SkillsFilterAll.length; i++) {
-                                    if (skills.contains(s_SkillsFilterAll[i])) {
+                                for (int i = 0; i < s_SkillsFilterAny.length; i++) {
+                                    if (skills.contains(s_SkillsFilterAny[i])) {
                                         success = true;
                                         break;
                                     }
@@ -353,7 +439,8 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "[BTA] Volley error: " + error.getMessage());
+                        //Log.e(TAG, "[BTA] Volley error: " + error.getMessage());
+                        error.printStackTrace();
                     }
                 }
         );
@@ -373,10 +460,44 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         // we create a profile list entry anyway to put in the ProfileListActivity
         // This will happen regardless of whether we're in the app or not
         Profile entry = new Profile(name, userID, imageBytes, distance);
-        s_ProfileListEntries.add(entry);
+        int index = s_ProfileListEntries.indexOf(entry);
+        if (index == -1) {
+            s_ProfileListEntries.add(entry);
+        }
+        else {
+            // update existing entries
+            s_ProfileListEntries.remove(index);
+            s_ProfileListEntries.add(index, entry);
+        }
+
         if (m_ProfileListActivity != null) {
             m_ProfileListActivity.notifyChanged();
         }
+    }
+
+    public boolean skillsFilterMatch(ArrayList<String> skills) {
+        boolean success = true;
+        // using FILTERING_ALL mode
+        if (s_FilteringMode == FILTERING_ALL) {
+            for (int i = 0; i < s_SkillsFilterAll.length; i++) {
+                if (!skills.contains(s_SkillsFilterAll[i])) {
+                    success = false;
+                    break;
+                }
+            }
+        }
+        // using FILTERING_ANY mode
+        else if (s_FilteringMode == FILTERING_ANY) {
+            success = false;
+            for (int i = 0; i < s_SkillsFilterAny.length; i++) {
+                if (skills.contains(s_SkillsFilterAny[i])) {
+                    success = true;
+                    break;
+                }
+            }
+        }
+
+        return success;
     }
 
     // this is a temporary test method. delete it!
@@ -411,5 +532,9 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
     public void setProfileListActivity(ProfileListActivity activity) {
         m_ProfileListActivity = activity;
+    }
+
+    public static void removeProfileEntry(int index) {
+        s_ProfileListEntries.remove(index);
     }
 }

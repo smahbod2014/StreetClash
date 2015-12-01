@@ -128,7 +128,14 @@ public class OptionsActivity extends AppCompatActivity {
 
     public void startTransmitting() {
         if (!m_Transmitter.isStarted())
-            m_Transmitter.startAdvertising();
+        {
+            try {
+                m_Transmitter.startAdvertising();
+            }
+            catch (Exception e) {
+                Log.e(TAG, "Unable to transmit! Bluetooth Advertising not supported.");
+            }
+        }
     }
 
     public void stopTransmitting() {

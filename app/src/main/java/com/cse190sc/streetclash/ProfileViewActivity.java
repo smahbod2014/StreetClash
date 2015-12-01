@@ -91,7 +91,11 @@ public class ProfileViewActivity extends AppCompatActivity {
             ageView.setText(m_Age);
             nameGender.setText(m_Gender);
             nameAbout.setText(m_AboutMe);
-            m_ProfileImage.setImageBitmap(image);
+            SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+            if (prefs.getBoolean("temporaryPic", true))
+                m_ProfileImage.setImageResource(R.mipmap.cse190_otherprofile);
+            else
+                m_ProfileImage.setImageBitmap(image);
 
             ListAdapter adapter = new CustomAdapter(this, m_Skills);
             ListView listView = (ListView) findViewById(R.id.listView);
@@ -124,14 +128,19 @@ public class ProfileViewActivity extends AppCompatActivity {
                                 JSONArray skillsArray = response.getJSONArray("skills");
                                 m_Skills = new String[skillsArray.length()];
                                 for (int i = 0; i < skillsArray.length(); i++) {
-                                    m_Skills[i] = (String) skillsArray.get(i);
+                                    try {
+                                        m_Skills[i] = (String) skillsArray.get(i);
+                                    }
+                                    catch (Exception e) {
+                                        m_Skills[i] = "ERROR";
+                                        e.printStackTrace();
+                                    }
                                 }
 
                                 nameView.setText(m_Name);
                                 ageView.setText(m_Age);
                                 nameGender.setText(m_Gender);
                                 nameAbout.setText(m_AboutMe);
-                                //m_ProfileImage.setImageBitmap(image);
 
                                 ListAdapter adapter = new CustomAdapter(getApplicationContext(), m_Skills);
                                 ListView listView = (ListView) findViewById(R.id.listView);
@@ -181,13 +190,17 @@ public class ProfileViewActivity extends AppCompatActivity {
     public void passFeedButtonClicked(View v) {
         Log.i(TAG, "PVA: passFeedButton, going to ProfileListActivity");
         Intent i = new Intent(this, ProfileListActivity.class);
+//        m_ProfileImage.setImageBitmap(null);
         startActivity(i);
+        finish();
     }
 
     public void optionsButtonClicked(View v) {
         Log.i(TAG, "PVA: optionsButton, going to OptionsActivity");
         Intent i = new Intent(this, OptionsActivity.class);
+//        m_ProfileImage.setImageBitmap(null);
         startActivity(i);
+        finish();
     }
 
     @Override
@@ -239,6 +252,7 @@ public class ProfileViewActivity extends AppCompatActivity {
             Bitmap profile = m_ProfileImage.getDrawingCache();
             i.putExtra("profile_image", profile);
             i.putExtra("cameFromProfileView", true);
+            m_ProfileImage.setImageBitmap(null);
             startActivity(i);
             return true;
         }

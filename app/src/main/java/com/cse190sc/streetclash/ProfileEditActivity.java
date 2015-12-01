@@ -129,6 +129,8 @@ public class ProfileEditActivity extends AppCompatActivity {
                 cursor.close();
 
                 m_ProfileImage.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+                SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+                prefs.edit().putBoolean("temporaryPic", false).apply();
             }
         }
     }
@@ -194,30 +196,24 @@ public class ProfileEditActivity extends AppCompatActivity {
 
             //temporary image field
 
+            SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
 
             //send stuff to server
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            profile.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] encoded = stream.toByteArray();
-            String imageAsString = "";
-            byte[] decoded = null;
-            try {
-                imageAsString = new String(encoded, "ISO-8859-1");
-                decoded = imageAsString.getBytes("ISO-8859-1");
-            }
-            catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-
-            for (int a = 0; a < encoded.length; a++) {
-                if (encoded[a] != decoded[a]) {
-                    Log.e(TAG, "Problem with decoding the image bytes! encoded was " + encoded[a] + " while decoded was " + decoded[a]);
+            String imageAsString = "temporary";
+            if (!prefs.getBoolean("temporaryPic", true)) {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                profile.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] encoded = stream.toByteArray();
+                try {
+                    imageAsString = new String(encoded, "ISO-8859-1");
+                }
+                catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
             }
 
             Log.i(TAG, "Image length is " + imageAsString.length() + " bytes");
 
-            SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
 
             // THIS IS A TEST LINE, REMOVE IT WHEN DONE
 //            ((BeaconTransmitterApplication) this.getApplicationContext()).createEntry(m_Name, imageAsString, prefs.getString("userID", "invalid"));
@@ -285,7 +281,9 @@ public class ProfileEditActivity extends AppCompatActivity {
 //            Volley.newRequestQueue(this).add(request);
             VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
 
+//            m_ProfileImage.setImageBitmap(null);
             startActivity(i);
+            finish();
 
             return true;
         }
@@ -314,7 +312,10 @@ public class ProfileEditActivity extends AppCompatActivity {
                //store chosen skills for passing in an intent
                 m_Skills = chosenSkills.toArray(new String[chosenSkills.size()]);
 
-                ListAdapter adapter = new CustomAdapter(ProfileEditActivity.this, chosenSkills.toArray(new String[1]));
+                Log.e(TAG, "m_Skills length is " + m_Skills.length);
+
+                ListAdapter adapter = new CustomAdapter(ProfileEditActivity.this, m_Skills);
+
                 ListView listView = (ListView) findViewById(R.id.listView);
                 listView.setAdapter(adapter);
                 setListViewHeightBasedOnChildren(listView);
@@ -369,8 +370,14 @@ public class ProfileEditActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
         setListViewHeightBasedOnChildren(listView);
 
-        Bitmap image = i.getExtras().getParcelable("profile_image");
-        m_ProfileImage.setImageBitmap(image);
+        SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+        if (prefs.getBoolean("temporaryPic", true)) {
+            m_ProfileImage.setImageResource(R.mipmap.cse190_profileadd);
+        }
+        else {
+            Bitmap image = i.getExtras().getParcelable("profile_image");
+            m_ProfileImage.setImageBitmap(image);
+        }
     }
 
     /* Method for Setting the Height of the ListView dynamically.

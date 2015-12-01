@@ -104,8 +104,13 @@ public class ProfileListActivity extends AppCompatActivity {
         public void bindProfile (Profile profile){
             mProfile = profile;
             mNameView.setText(mProfile.name);
-            double roundOff = Math.round(mProfile.distance * 100.0) / 100.0;
-            mDistanceView.setText("About " + roundOff + " meters away");
+            if (mProfile.inRange) {
+                double roundOff = Math.round(mProfile.distance * 100.0) / 100.0;
+                mDistanceView.setText("About " + roundOff + " meters away");
+            }
+            else {
+                mDistanceView.setText("Not in range");
+            }
 
             if (mProfile.imageBytes.equals("temporary")) {
                 mPhotoView.setImageResource(R.mipmap.cse190_otherprofile);

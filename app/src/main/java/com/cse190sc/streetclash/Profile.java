@@ -10,6 +10,7 @@ public class Profile {
     public String name;
     public String imageBytes;
     public double distance;
+    public boolean inRange = true;
 
     public Profile(String name, String userID, String imageBytes, double distance) {
         this.name = name;
@@ -18,11 +19,17 @@ public class Profile {
         this.distance = distance;
     }
 
+    public Profile(Profile p) {
+        userID = p.userID;
+        name = p.name;
+        imageBytes = p.imageBytes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Profile))
             return false;
         Profile p = (Profile) o;
-        return this.userID == p.userID;
+        return this.userID.equals(p.userID);
     }
 }

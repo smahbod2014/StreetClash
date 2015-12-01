@@ -182,6 +182,7 @@ public class FacebookLoginActivity extends AppCompatActivity
                                                     Intent i = new Intent(getApplicationContext(), ProfileEditActivity.class);
                                                     i.putExtra("facebookName", user.optString("name", "Enter name here"));
                                                     prefs.edit().putBoolean("newUser", true).apply();
+                                                    prefs.edit().putBoolean("temporaryPic", true).apply();
                                                     startActivity(i);
                                                     finish();
                                                 }
