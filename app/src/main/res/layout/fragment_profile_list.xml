@@ -24,7 +24,7 @@
             android:id="@+id/btn_pass_feed"
             android:layout_weight="0.26"
             android:layout_marginLeft="-4dp"
-            android:src="@mipmap/feed"
+            android:src="@mipmap/cse190_passfeedbutton"
             android:scaleType="fitCenter"/>
 
         <ImageButton
@@ -33,7 +33,7 @@
             android:id="@+id/imageButton"
             android:layout_weight="0.26"
             android:layout_marginLeft="-6dp"
-            android:src="@mipmap/profile"
+            android:src="@mipmap/cse190_profilebutton"
             android:scaleType="fitCenter"
             android:adjustViewBounds="false"
             android:onClick="profileButtonClicked"/>
@@ -43,7 +43,7 @@
             android:layout_height="match_parent"
             android:id="@+id/imageButton8"
             android:layout_marginLeft="-6dp"
-            android:src="@mipmap/wrench"
+            android:src="@mipmap/cse190_optionsbutton"
             android:scaleType="fitCenter"
             android:onClick="optionsButtonClicked"/>
 

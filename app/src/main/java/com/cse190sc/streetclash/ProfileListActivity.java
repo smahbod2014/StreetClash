@@ -108,7 +108,7 @@ public class ProfileListActivity extends AppCompatActivity {
             mDistanceView.setText("About " + roundOff + " meters away");
 
             if (mProfile.imageBytes.equals("temporary")) {
-                mPhotoView.setImageResource(R.mipmap.default_profile_pic);
+                mPhotoView.setImageResource(R.mipmap.cse190_otherprofile);
             }
             else {
                 byte[] decoded = null;
