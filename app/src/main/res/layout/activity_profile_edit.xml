@@ -25,7 +25,7 @@
                     android:layout_height="128dp"
                     android:id="@+id/iv_profile_pic"
                     android:layout_weight="0.25"
-                    android:src="@mipmap/default_profile_pic"
+                    android:src="@mipmap/cse190_profileadd"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"/>
 

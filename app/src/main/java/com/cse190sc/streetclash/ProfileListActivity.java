@@ -116,7 +116,7 @@ public class ProfileListActivity extends AppCompatActivity {
             //mPhotoView.setImageDrawable(null);
 
             if (mProfile.imageBytes.equals("temporary")) {
-                mPhotoView.setImageResource(R.mipmap.default_profile_pic);
+                mPhotoView.setImageResource(R.mipmap.cse190_otherprofile);
             }
             else {
                 byte[] decoded = null;

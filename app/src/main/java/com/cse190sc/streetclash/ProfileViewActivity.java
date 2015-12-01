@@ -141,7 +141,7 @@ public class ProfileViewActivity extends AppCompatActivity {
                                 String imageAsString = response.getString("image");
                                 if (imageAsString.equals("temporary")) {
                                     Log.i(TAG, "Image was temporary!");
-                                    m_ProfileImage.setImageResource(R.mipmap.default_profile_pic);
+                                    m_ProfileImage.setImageResource(R.mipmap.cse190_otherprofile);
                                 }
                                 else {
                                     byte[] decoded = null;

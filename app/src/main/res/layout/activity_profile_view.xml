@@ -25,7 +25,7 @@
                     android:layout_height="128dp"
                     android:id="@+id/iv_profile_pic"
                     android:layout_weight="0.25"
-                    android:src="@mipmap/default_profile_pic"
+                    android:src="@mipmap/cse190_otherprofile"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"/>
 
@@ -144,7 +144,7 @@
             android:id="@+id/btn_pass_feed"
             android:layout_weight="0.26"
             android:layout_marginLeft="-4dp"
-            android:src="@mipmap/feed"
+            android:src="@mipmap/cse190_passfeedbutton"
             android:scaleType="fitCenter"
             android:onClick="passFeedButtonClicked"/>
 
@@ -154,7 +154,7 @@
             android:id="@+id/imageButton"
             android:layout_weight="0.26"
             android:layout_marginLeft="-6dp"
-            android:src="@mipmap/profile"
+            android:src="@mipmap/cse190_profilebutton"
             android:scaleType="fitCenter"
             android:adjustViewBounds="false"/>/>
 
@@ -163,7 +163,7 @@
             android:layout_height="match_parent"
             android:id="@+id/imageButton8"
             android:layout_marginLeft="-6dp"
-            android:src="@mipmap/wrench"
+            android:src="@mipmap/cse190_optionsbutton"
             android:scaleType="fitCenter"
             android:onClick="optionsButtonClicked"/>
 
