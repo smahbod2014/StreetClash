@@ -9,11 +9,13 @@ public class Profile {
     public String userID;
     public String name;
     public String imageBytes;
+    public double distance;
 
-    public Profile(String name, String userID, String imageBytes){
+    public Profile(String name, String userID, String imageBytes, double distance) {
         this.name = name;
         this.userID = userID;
         this.imageBytes = imageBytes;
+        this.distance = distance;
     }
 
     @Override

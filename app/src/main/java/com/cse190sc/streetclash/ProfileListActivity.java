@@ -41,17 +41,6 @@ public class ProfileListActivity extends AppCompatActivity {
         ((BeaconTransmitterApplication) this.getApplicationContext()).setProfileListActivity(this);
 
         updateUI();
-
-
-//        boolean b = this.getIntent().getBooleanExtra("arrivedFromNotification", false);
-//        if (b) {
-//            Toast.makeText(this, "Arrived from notification", Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "Came from notification");
-//        }
-//        else {
-//            Toast.makeText(this, "Opened app manually", Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "Opened app manually");
-//        }
     }
 
     public void profileButtonClicked(View v) {
@@ -98,6 +87,7 @@ public class ProfileListActivity extends AppCompatActivity {
     private class ProfileHolder extends RecyclerView.ViewHolder implements
             ItemTouchHelperViewHolder, View.OnClickListener {
         private TextView mNameView;
+        private TextView mDistanceView;
         private ImageView mPhotoView;
 
         private Profile mProfile;
@@ -108,12 +98,14 @@ public class ProfileListActivity extends AppCompatActivity {
 
             mNameView = (TextView) itemView.findViewById(R.id.list_item_profile_name_text_view);
             mPhotoView = (ImageView) itemView.findViewById(R.id.list_item_profile_photo_image_view);
+            mDistanceView = (TextView) itemView.findViewById(R.id.list_item_distance);
         }
 
         public void bindProfile (Profile profile){
             mProfile = profile;
             mNameView.setText(mProfile.name);
-            //mPhotoView.setImageDrawable(null);
+            double roundOff = Math.round(mProfile.distance * 100.0) / 100.0;
+            mDistanceView.setText("About " + roundOff + " meters away");
 
             if (mProfile.imageBytes.equals("temporary")) {
                 mPhotoView.setImageResource(R.mipmap.default_profile_pic);

@@ -81,7 +81,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                         synchronized (m_BeaconMap) {
                             //first time seeing this beacon
                             if(m_BeaconMap.get(beacon.getId2()) == null) {
-                                handleBeaconSighting(beacon.getId2());
+                                handleBeaconSighting(beacon.getId2(), beacon.getDistance());
                             }
                             m_BeaconMap.put(beacon.getId2(), System.currentTimeMillis());
                         }
@@ -300,7 +300,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         s_FilteringMode = mode;
     }
 
-    private void handleBeaconSighting(Identifier id) {
+    private void handleBeaconSighting(Identifier id, final double distance) {
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
                 Constants.SERVER_URL + "/users?userID=" + id.toString(),
@@ -341,7 +341,8 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                                 notifyAboutUser(
                                         response.getString("name"),
                                         response.getString("image"),
-                                        response.getString("userID"));
+                                        response.getString("userID"),
+                                        distance);
                             }
                         }
                         catch (JSONException e) {
@@ -360,7 +361,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         VolleySingleton.getInstance(this).addToRequestQueue(request);
     }
 
-    private void notifyAboutUser(String name, String imageBytes, String userID) {
+    private void notifyAboutUser(String name, String imageBytes, String userID, double distance) {
         if (isAppInBackground()) {
             Log.d(TAG, "Sending notification!");
             createNotification();
@@ -371,7 +372,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
         // we create a profile list entry anyway to put in the ProfileListActivity
         // This will happen regardless of whether we're in the app or not
-        Profile entry = new Profile(name, userID, imageBytes);
+        Profile entry = new Profile(name, userID, imageBytes, distance);
         s_ProfileListEntries.add(entry);
         if (m_ProfileListActivity != null) {
             m_ProfileListActivity.notifyChanged();
@@ -380,7 +381,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
     // this is a temporary test method. delete it!
     public void createEntry(String name, String imageBytes, String userID) {
-        final Profile entry = new Profile(name, userID, imageBytes);
+        final Profile entry = new Profile(name, userID, imageBytes, 0.0);
         s_ProfileListEntries.add(entry);
         if (m_ProfileListActivity != null) {
             m_ProfileListActivity.notifyChanged();
