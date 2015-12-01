@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -416,5 +418,16 @@ public class ProfileEditActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         BeaconTransmitterApplication.leavingApp();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        Drawable drawable = m_ProfileImage.getDrawable();
+//        if (drawable instanceof BitmapDrawable) {
+//            BitmapDrawable bd = (BitmapDrawable) drawable;
+//            Bitmap bitmap = bd.getBitmap();
+//            bitmap.recycle();
+//        }
     }
 }

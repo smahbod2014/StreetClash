@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,6 +42,8 @@ public class ProfileListActivity extends AppCompatActivity {
         ((BeaconTransmitterApplication) this.getApplicationContext()).setProfileListActivity(this);
 
         updateUI();
+
+        BeaconTransmitterApplication.setProfileImagesChanged();
     }
 
     public void profileButtonClicked(View v) {
@@ -74,6 +77,8 @@ public class ProfileListActivity extends AppCompatActivity {
                 mAdapter.notifyDataSetChanged();
             }
         });
+
+        System.gc();
     }
 
     private void updateUI(){
@@ -112,23 +117,26 @@ public class ProfileListActivity extends AppCompatActivity {
                 mDistanceView.setText("Not in range");
             }
 
-            if (mProfile.imageBytes.equals("temporary")) {
-                mPhotoView.setImageResource(R.mipmap.cse190_otherprofile);
-            }
-            else {
-                byte[] decoded = null;
-                try {
-                    decoded = mProfile.imageBytes.getBytes("ISO-8859-1");
+//            if (mProfile.imageChanged) {
+//                mProfile.imageChanged = false;
+                if (mProfile.imageBytes.equals("temporary")) {
+                    mPhotoView.setImageResource(R.mipmap.cse190_otherprofile);
                 }
-                catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                else {
+                    byte[] decoded = null;
+                    try {
+                        decoded = mProfile.imageBytes.getBytes("ISO-8859-1");
+                    }
+                    catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    mPhotoView.setImageBitmap(
+                            BitmapFactory.decodeByteArray(
+                                    decoded,
+                                    0,
+                                    mProfile.imageBytes.length()));
                 }
-                mPhotoView.setImageBitmap(
-                        BitmapFactory.decodeByteArray(
-                                decoded,
-                                0,
-                                mProfile.imageBytes.length()));
-            }
+//            }
         }
 
         @Override

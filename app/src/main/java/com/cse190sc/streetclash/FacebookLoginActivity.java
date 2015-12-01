@@ -41,6 +41,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.cse190sc.streetclash.R;
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -93,6 +94,7 @@ public class FacebookLoginActivity extends AppCompatActivity
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private Button mProceedToApp;
 
     /**************************************************************************
      * Private Instances to control Login
@@ -107,19 +109,6 @@ public class FacebookLoginActivity extends AppCompatActivity
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_facebook_login);
 
-//        These two lines were for testing!
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(5000);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                BeaconTransmitterApplication app = (BeaconTransmitterApplication) FacebookLoginActivity.this.getApplicationContext();
-//                app.createNotification();
-//            }
-//        }).start();
 
         /**********************************************************************
          * 1. Initialize FacebookSDK
@@ -133,6 +122,8 @@ public class FacebookLoginActivity extends AppCompatActivity
         // You can set your Read/ Publish Permissions here
         // button.setReadPermissions(List or String);
         // or button .setPublishPermissions(List or String)
+
+        mProceedToApp = (Button) findViewById(R.id.proceed_to_app);
 
         button.registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
@@ -224,12 +215,6 @@ public class FacebookLoginActivity extends AppCompatActivity
                          * AccessTokens.getCurrentAccessToken().getUserID() or
                          * AccessTokens.getCurrentAccessToken().getTokenID()
                          *************************************************************/
-//                        Intent intent = new Intent(getApplicationContext(),
-//                                SecondActivity.class);
-//                        intent.putExtra("UserID", userID);
-//                        intent.putExtra("TokenID", tokenID);
-//                        startActivity(intent);
-//                        finish();
                     }
 
                     /******************************************************************
@@ -553,6 +538,16 @@ public class FacebookLoginActivity extends AppCompatActivity
         AppEventsLogger.activateApp(this);
 
         BeaconTransmitterApplication.enteringApp();
+
+        AccessToken token = AccessToken.getCurrentAccessToken();
+        if (token != null) {
+            Log.i("StreetClash", "Already logged in");
+            mProceedToApp.setEnabled(true);
+        }
+        else {
+            Log.i("StreetClash", "NOPE");
+            mProceedToApp.setEnabled(false);
+        }
     }
 
     @Override
@@ -563,6 +558,14 @@ public class FacebookLoginActivity extends AppCompatActivity
         AppEventsLogger.deactivateApp(this);
 
         BeaconTransmitterApplication.leavingApp();
+    }
+
+    public void proceedToAppClicked(View v) {
+        SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
+        prefs.edit().putBoolean("newUser", false).apply();
+        Intent i = new Intent(getApplicationContext(), ProfileListActivity.class);
+        startActivity(i);
+        finish();
     }
 }
 

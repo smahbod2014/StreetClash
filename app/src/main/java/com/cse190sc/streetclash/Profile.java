@@ -11,6 +11,7 @@ public class Profile {
     public String imageBytes;
     public double distance;
     public boolean inRange = true;
+    public boolean imageChanged = true;
 
     public Profile(String name, String userID, String imageBytes, double distance) {
         this.name = name;

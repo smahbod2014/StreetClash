@@ -13,6 +13,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -213,6 +215,17 @@ public class ProfileViewActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         BeaconTransmitterApplication.leavingApp();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        Drawable drawable = m_ProfileImage.getDrawable();
+//        if (drawable instanceof BitmapDrawable) {
+//            BitmapDrawable bd = (BitmapDrawable) drawable;
+//            Bitmap bitmap = bd.getBitmap();
+//            bitmap.recycle();
+//        }
     }
 
     @Override

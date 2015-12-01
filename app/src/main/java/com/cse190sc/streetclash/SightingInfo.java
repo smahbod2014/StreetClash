@@ -8,4 +8,8 @@ public class SightingInfo {
         this.time = time;
         this.seen = seen;
     }
+
+    public SightingInfo() {
+        this(System.currentTimeMillis(), false);
+    }
 }

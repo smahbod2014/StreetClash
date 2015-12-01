@@ -8,12 +8,10 @@ import android.app.TaskStackBuilder;
 import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.android.volley.ExecutorDelivery;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -49,7 +47,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     private static final long TIMEOUT = 10 * 700;
     public static final int FILTERING_ALL = 0;
     public static final int FILTERING_ANY = 1;
-    public static final double MAX_DISTANCE = 2.0;
+    public static final double MAX_DISTANCE = 5.0;
     private RegionBootstrap m_RegionBootstrap;
     private BackgroundPowerSaver m_PowerSaver;
     private BeaconManager m_BeaconManager;
@@ -60,7 +58,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     private static String[] s_SkillsFilterAny = new String[1];
     private static int s_FilteringMode = FILTERING_ALL;
     private Region m_Region;
-    private final HashMap<Identifier, Long> m_BeaconMap = new HashMap<>();
+    private final HashMap<String, SightingInfo> m_BeaconMap = new HashMap<>();
     private static final ArrayList<Profile> s_ProfileListEntries = new ArrayList<>();
     private ProfileListActivity m_ProfileListActivity;
 
@@ -76,27 +74,21 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> collection, Region region) {
                 if (collection.size() > 0) {
-                    StringBuilder sb = new StringBuilder();
                     for (Beacon beacon : collection) {
                         if (beacon.getDistance() > MAX_DISTANCE)
                             continue;
 
-                        synchronized (m_BeaconMap) {
-                            //first time seeing this beacon
-                            if (m_BeaconMap.get(beacon.getId2()) == null) {
-                                handleBeaconSighting(beacon.getId2(), beacon.getDistance());
-                            }
+                        String userID = beacon.getId2().toString();
 
-                            m_BeaconMap.put(beacon.getId2(), System.currentTimeMillis());
+                        synchronized (m_BeaconMap) {
+                            if (!m_BeaconMap.containsKey(userID))
+                                m_BeaconMap.put(userID, new SightingInfo());
+                            else
+                                m_BeaconMap.get(userID).time = System.currentTimeMillis();
                         }
 
-                        updateAllEntriesDistance(beacon.getId2(), beacon.getDistance());
-
-                        sb.append("Beacon with id2 = " + beacon.getId2() + " is " + beacon.getDistance() + " meters away");
-                        sb.append("\n");
+                        updateAllEntriesDistance(userID, beacon.getDistance());
                     }
-                    //logToDisplay(sb.toString());
-                    //logNumBeacons();
                 }
             }
         });
@@ -129,9 +121,9 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
             public void run() {
                 while (true) {
                     synchronized (m_BeaconMap) {
-                        ArrayList<Identifier> idsToRemove = new ArrayList<>();
-                        for (Identifier id : m_BeaconMap.keySet()) {
-                            Long time = m_BeaconMap.get(id);
+                        ArrayList<String> idsToRemove = new ArrayList<>();
+                        for (String id : m_BeaconMap.keySet()) {
+                            Long time = m_BeaconMap.get(id).time;
                             if (System.currentTimeMillis() - time >= TIMEOUT) {
                                 idsToRemove.add(id);
                             }
@@ -139,8 +131,8 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
                         boolean changed = false;
                         for (int i = 0; i < idsToRemove.size(); i++) {
-                            m_BeaconMap.remove(idsToRemove.get(i));
-                            String userID = idsToRemove.get(i).toString();
+                            String userID = idsToRemove.get(i);
+                            m_BeaconMap.remove(userID);
 
                             for (int j = 0; j < s_ProfileListEntries.size(); j++) {
                                 Profile p = s_ProfileListEntries.get(j);
@@ -170,63 +162,67 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         }).start();
     }
 
-    private void updateAllEntriesDistance(Identifier id, double distance) {
-        final String userID = id.toString();
-        boolean changed = false;
-        for (int i = 0; i < s_ProfileListEntries.size(); i++) {
-            final Profile p = s_ProfileListEntries.get(i);
-            if (p.userID.equals(userID)) {
-                p.distance = distance;
-                changed = true;
+    private void updateAllEntriesDistance(final String userID, final double distance) {
+        JsonObjectRequest req = new JsonObjectRequest(
+                Request.Method.GET,
+                Constants.SERVER_URL + "/users?userID=" + userID,
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String name = response.getString("name");
+                            String imageBytes = response.getString("image");
 
-                JsonObjectRequest req = new JsonObjectRequest(
-                        Request.Method.GET,
-                        Constants.SERVER_URL + "/users?userID=" + userID,
-                        null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    String name = response.getString("name");
-                                    String imageBytes = response.getString("image");
-                                    if (!p.name.equals(name) || !p.imageBytes.equals(imageBytes)) {
-                                        //the user has changed their stuff!
-                                        p.name = name;
-                                        p.imageBytes = imageBytes;
-                                        Log.i(TAG, "Remote user " + userID + " has changed their info! Updating");
+                            JSONArray skillsArray = response.getJSONArray("skills");
+                            ArrayList<String> skills = new ArrayList<>();
+                            for (int i = 0; i < skillsArray.length(); i++) {
+                                skills.add((String) skillsArray.get(i));
+                            }
 
-                                        if (m_ProfileListActivity != null) {
-                                            m_ProfileListActivity.notifyChanged();
+                            if (skillsFilterMatch(skills)) {
+                                // notify if this is the first time it's a match
+                                SightingInfo si = m_BeaconMap.get(userID);
+                                if (!si.seen && isAppInBackground()) {
+                                    createNotification();
+                                }
+
+                                si.seen = true;
+                                updateUserInfo(name, imageBytes, userID, distance);
+                            }
+                            else {
+                                // Doesn't match the skills, make it look like this person isn't in range
+                                SightingInfo si = m_BeaconMap.get(userID);
+                                if (si.seen) {
+                                    si.seen = false;
+                                    for (int i = 0; i < s_ProfileListEntries.size(); i++) {
+                                        if (s_ProfileListEntries.get(i).userID.equals(userID)) {
+                                            s_ProfileListEntries.get(i).inRange = false;
+                                            notifyChanged();
                                         }
                                     }
-
-                                    JSONArray skillsArray = response.getJSONArray("skills");
-                                    ArrayList<String> skills = new ArrayList<>();
-                                    for (int i = 0; i < skillsArray.length(); i++) {
-                                        skills.add((String) skillsArray.get(i));
-                                    }
-
-                                    if (!skillsFilterMatch(skills)) {
-                                        // notify if this is the first time it's a match
-                                    }
                                 }
-                                catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                error.printStackTrace();
+
                             }
                         }
-                );
-            }
-        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }
+        );
 
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+    }
 
-        if (m_ProfileListActivity != null && changed) {
+    public void notifyChanged() {
+        if (m_ProfileListActivity != null) {
             m_ProfileListActivity.notifyChanged();
         }
     }
@@ -385,78 +381,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         s_FilteringMode = mode;
     }
 
-    private void handleBeaconSighting(Identifier id, final double distance) {
-        Log.e(TAG, "Handling beacon sighting for userID = " + id.toString() + " at distance ~" + distance);
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.GET,
-                Constants.SERVER_URL + "/users?userID=" + id.toString(),
-                null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray skillsArray = response.getJSONArray("skills");
-                            ArrayList<String> skills = new ArrayList<>();
-                            for (int i = 0; i < skillsArray.length(); i++) {
-                                skills.add((String) skillsArray.get(i));
-                            }
-
-                            boolean success = true;
-                            // using FILTERING_ALL mode
-                            if (s_FilteringMode == FILTERING_ALL) {
-                                for (int i = 0; i < s_SkillsFilterAll.length; i++) {
-                                    if (!skills.contains(s_SkillsFilterAll[i])) {
-                                        success = false;
-                                        break;
-                                    }
-                                }
-                            }
-                            // using FILTERING_ANY mode
-                            else if (s_FilteringMode == FILTERING_ANY) {
-                                success = false;
-                                for (int i = 0; i < s_SkillsFilterAny.length; i++) {
-                                    if (skills.contains(s_SkillsFilterAny[i])) {
-                                        success = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // yes! notify us about this user
-                            if (success) {
-                                notifyAboutUser(
-                                        response.getString("name"),
-                                        response.getString("image"),
-                                        response.getString("userID"),
-                                        distance);
-                            }
-                        }
-                        catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Log.e(TAG, "[BTA] Volley error: " + error.getMessage());
-                        error.printStackTrace();
-                    }
-                }
-        );
-
-        VolleySingleton.getInstance(this).addToRequestQueue(request);
-    }
-
-    private void notifyAboutUser(String name, String imageBytes, String userID, double distance) {
-        if (isAppInBackground()) {
-            Log.d(TAG, "Sending notification!");
-            createNotification();
-        }
-        else {
-            Log.d(TAG, "No need to send a notification, app is in foreground");
-        }
-
+    private void updateUserInfo(String name, String imageBytes, String userID, double distance) {
         // we create a profile list entry anyway to put in the ProfileListActivity
         // This will happen regardless of whether we're in the app or not
         Profile entry = new Profile(name, userID, imageBytes, distance);
@@ -466,8 +391,16 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         }
         else {
             // update existing entries
-            s_ProfileListEntries.remove(index);
-            s_ProfileListEntries.add(index, entry);
+            //s_ProfileListEntries.remove(index);
+            //s_ProfileListEntries.add(index, entry);
+
+            Profile p = s_ProfileListEntries.get(index);
+            p.name = name;
+            p.distance = distance;
+//            if (!p.imageBytes.equals(imageBytes)) {
+                p.imageBytes = imageBytes;
+//                p.imageChanged = true;
+//            }
         }
 
         if (m_ProfileListActivity != null) {
@@ -536,5 +469,11 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
     public static void removeProfileEntry(int index) {
         s_ProfileListEntries.remove(index);
+    }
+
+    public static void setProfileImagesChanged() {
+        for (Profile p : s_ProfileListEntries) {
+            p.imageChanged = true;
+        }
     }
 }
