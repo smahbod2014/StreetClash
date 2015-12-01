@@ -33,6 +33,9 @@
             android:name=".ProfileListActivity"/>
 
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="9f84aff748de58167a7c25e377251261da60c343" />
     </application>
 
 </manifest>
