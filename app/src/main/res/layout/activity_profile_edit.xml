@@ -3,7 +3,8 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:weightSum="1">
+              android:weightSum="1"
+    android:background="#1F2B3C">
 
     <ScrollView
         android:layout_width="wrap_content"
@@ -42,7 +43,8 @@
                         android:ems="10"
                         android:id="@+id/et_name"
                         android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp" />
+                        android:layout_marginTop="10dp"
+                        android:textColor="#FFFFFF" />
 
                     <LinearLayout
                         android:orientation="horizontal"
@@ -55,7 +57,8 @@
                             android:inputType="number"
                             android:ems="10"
                             android:id="@+id/et_age"
-                            android:layout_marginLeft="10dp" />
+                            android:layout_marginLeft="10dp"
+                            android:textColor="#FFFFFF" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -64,7 +67,8 @@
                             android:text="@string/years_old"
                             android:id="@+id/textView2"
                             android:textSize="18sp"
-                            android:layout_marginLeft="5dp" />
+                            android:layout_marginLeft="5dp"
+                            android:textColor="#FFFFFF" />
                     </LinearLayout>
 
                     <Spinner
@@ -74,7 +78,8 @@
                         android:spinnerMode="dropdown"
                         android:entries="@array/gender_array"
                         android:contextClickable="true"
-                        android:layout_marginLeft="10dp" />
+                        android:layout_marginLeft="10dp"
+                        android:textColor="#FFFFFF"/>
 
                 </LinearLayout>
             </LinearLayout>
@@ -86,7 +91,8 @@
                 android:text="About Me"
                 android:id="@+id/textView3"
                 android:layout_marginTop="10dp"
-                android:layout_marginLeft="10dp" />
+                android:layout_marginLeft="10dp"
+                android:textColor="#FFFFFF" />
 
             <EditText
                 android:layout_width="match_parent"
@@ -98,7 +104,8 @@
                 android:height="200dp"
                 android:maxLines="10"
                 android:layout_margin="10dp"
-                android:background="@drawable/scrollview_border" />
+                android:background="@drawable/scrollview_border"
+                android:textColor="#FFFFFF" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -111,7 +118,8 @@
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="Skills"
                     android:id="@+id/textView4"
-                    android:layout_marginLeft="10dp" />
+                    android:layout_marginLeft="10dp"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:layout_width="wrap_content"

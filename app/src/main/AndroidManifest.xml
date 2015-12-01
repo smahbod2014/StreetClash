@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:name=".BeaconTransmitterApplication"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme2" >
         <activity
             android:name=".FacebookLoginActivity"
             android:screenOrientation="portrait" >
