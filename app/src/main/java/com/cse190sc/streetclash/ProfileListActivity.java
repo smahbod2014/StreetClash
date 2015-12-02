@@ -17,6 +17,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +29,7 @@ public class ProfileListActivity extends AppCompatActivity {
     private RecyclerView mProfileRecyclerView;
     private ProfileAdapter mAdapter;
     private ItemTouchHelper mItemTouchHelper;
+    private Tracker mTracker;
 
     //Beacon Stuff
     private static final String TAG = "ProfileListActivity";
@@ -43,7 +47,22 @@ public class ProfileListActivity extends AppCompatActivity {
 
         updateUI();
 
-        BeaconTransmitterApplication.setProfileImagesChanged();
+        //ANALYTICS
+        BeaconTransmitterApplication application = (BeaconTransmitterApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        // [START screen_view_hit]
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // [END screen_view_hit]
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Share")
+                .build());
     }
 
     public void profileButtonClicked(View v) {
@@ -110,33 +129,30 @@ public class ProfileListActivity extends AppCompatActivity {
             mProfile = profile;
             mNameView.setText(mProfile.name);
             if (mProfile.inRange) {
-                double roundOff = Math.round(mProfile.distance * 100.0) / 100.0;
+                double roundOff = Math.round(mProfile.distance * 1000.0) / 1000.0;
                 mDistanceView.setText("About " + roundOff + " meters away");
             }
             else {
                 mDistanceView.setText("Not in range");
             }
 
-//            if (mProfile.imageChanged) {
-//                mProfile.imageChanged = false;
-                if (mProfile.imageBytes.equals("temporary")) {
-                    mPhotoView.setImageResource(R.mipmap.cse190_otherprofile);
+            if (mProfile.imageBytes.equals("temporary")) {
+                mPhotoView.setImageResource(R.mipmap.cse190_otherprofile);
+            }
+            else {
+                byte[] decoded = null;
+                try {
+                    decoded = mProfile.imageBytes.getBytes("ISO-8859-1");
                 }
-                else {
-                    byte[] decoded = null;
-                    try {
-                        decoded = mProfile.imageBytes.getBytes("ISO-8859-1");
-                    }
-                    catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                    mPhotoView.setImageBitmap(
-                            BitmapFactory.decodeByteArray(
-                                    decoded,
-                                    0,
-                                    mProfile.imageBytes.length()));
+                catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
-//            }
+                mPhotoView.setImageBitmap(
+                        BitmapFactory.decodeByteArray(
+                                decoded,
+                                0,
+                                mProfile.imageBytes.length()));
+            }
         }
 
         @Override

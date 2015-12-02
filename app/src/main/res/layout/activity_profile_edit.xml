@@ -72,6 +72,7 @@
                     </LinearLayout>
 
                     <Spinner
+                        android:background="#FFFFFF"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/spinner_gender"
@@ -83,6 +84,26 @@
 
                 </LinearLayout>
             </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Contact"
+                android:id="@+id/edit_contact_tv"
+                android:layout_margin="10dp"
+                android:textColor="#FFFFFF"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:ems="10"
+                android:id="@+id/edit_contact_et"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="-15dp"
+                android:width="300dp"
+                android:textColor="#FFFFFF"/>
 
             <TextView
                 android:layout_width="wrap_content"

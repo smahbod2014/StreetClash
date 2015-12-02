@@ -36,6 +36,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.ndk.CrashlyticsNdk;
+import com.google.android.gms.analytics.HitBuilders;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +48,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.android.gms.analytics.Tracker;
+
+import io.fabric.sdk.android.Fabric;
 
 public class ProfileEditActivity extends AppCompatActivity {
 
@@ -64,6 +71,7 @@ public class ProfileEditActivity extends AppCompatActivity {
     private String m_Gender;
     private String m_AboutMe;
     private String[] m_Skills;
+    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +119,23 @@ public class ProfileEditActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra("cameFromProfileView"))
             populateFields();
+
+        //ANALYTICS
+        BeaconTransmitterApplication application = (BeaconTransmitterApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        // [START screen_view_hit]
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // [END screen_view_hit]
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Share")
+                .build());
     }
 
     @Override
@@ -178,6 +203,9 @@ public class ProfileEditActivity extends AppCompatActivity {
             EditText editAbout = (EditText) findViewById(R.id.about_me);
             m_AboutMe = editAbout.getText().toString();
 
+            EditText editContact = (EditText) findViewById(R.id.edit_contact_et);
+            String contact = editContact.getText().toString();
+
             //send the set fields to the real profile screen
             Intent i = new Intent(this, ProfileViewActivity.class);
             i.putExtra("profile_image", profile);
@@ -185,6 +213,7 @@ public class ProfileEditActivity extends AppCompatActivity {
             i.putExtra("age", m_Age);
             i.putExtra("gender", m_Gender);
             i.putExtra("about_me", m_AboutMe);
+            i.putExtra("email", contact);
             i.putExtra("editScreen", true);
             i.putExtra("ownProfile", true);
 
@@ -227,6 +256,7 @@ public class ProfileEditActivity extends AppCompatActivity {
                 obj.put("age", m_Age);
                 obj.put("gender", m_Gender);
                 obj.put("about", m_AboutMe);
+                obj.put("email", contact);
                 obj.put("image", imageAsString);
 
                 ArrayList<String> skillsList = new ArrayList<>();
@@ -344,6 +374,10 @@ public class ProfileEditActivity extends AppCompatActivity {
         EditText editAge = (EditText) findViewById(R.id.et_age);
         String age = i.getStringExtra("age");
         editAge.setText(age);
+
+        EditText editContact = (EditText) findViewById(R.id.edit_contact_et);
+        String contact = i.getStringExtra("email");
+        editContact.setText(contact);
 
         Spinner gender = (Spinner) findViewById(R.id.spinner_gender);
         String g = i.getStringExtra("gender");

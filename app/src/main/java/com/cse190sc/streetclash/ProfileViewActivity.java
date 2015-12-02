@@ -4,18 +4,8 @@ import android.content.SharedPreferences;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +21,8 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,6 +45,7 @@ public class ProfileViewActivity extends AppCompatActivity {
     private String m_Gender;
     private String m_AboutMe;
     private String[] m_Skills;
+    private Tracker mTracker;
 
     //Beacon Code
     private BeaconTransmitterApplication m_Application;
@@ -75,6 +68,7 @@ public class ProfileViewActivity extends AppCompatActivity {
         m_ProfileImage = (ImageView) findViewById(R.id.iv_profile_pic);
         final TextView nameGender = (TextView) findViewById(R.id.text_gender);
         final TextView nameAbout = (TextView) findViewById(R.id.aboutString);
+        final TextView contactEmail = (TextView) findViewById(R.id.view_contact_email);
         //different fields depending on how profile was accessed
         //three possibilities: from editing own profile, from personal profile button,
         //                     or from other person's profile button on pass feed screen
@@ -93,6 +87,7 @@ public class ProfileViewActivity extends AppCompatActivity {
             ageView.setText(m_Age);
             nameGender.setText(m_Gender);
             nameAbout.setText(m_AboutMe);
+            contactEmail.setText(i.getStringExtra("email"));
             SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
             if (prefs.getBoolean("temporaryPic", true))
                 m_ProfileImage.setImageResource(R.mipmap.cse190_otherprofile);
@@ -143,6 +138,7 @@ public class ProfileViewActivity extends AppCompatActivity {
                                 ageView.setText(m_Age);
                                 nameGender.setText(m_Gender);
                                 nameAbout.setText(m_AboutMe);
+                                contactEmail.setText(response.getString("email"));
 
                                 ListAdapter adapter = new CustomAdapter(getApplicationContext(), m_Skills);
                                 ListView listView = (ListView) findViewById(R.id.listView);
@@ -184,15 +180,30 @@ public class ProfileViewActivity extends AppCompatActivity {
             );
 
             VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
-
-
         }
+
+        //ANALYTICS
+        BeaconTransmitterApplication application = (BeaconTransmitterApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        // [START screen_view_hit]
+        Log.i(TAG, "Setting screen name: " + this.getClass().getSimpleName());
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // [END screen_view_hit]
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Share")
+                .build());
     }
 
     public void passFeedButtonClicked(View v) {
         Log.i(TAG, "PVA: passFeedButton, going to ProfileListActivity");
+
         Intent i = new Intent(this, ProfileListActivity.class);
-//        m_ProfileImage.setImageBitmap(null);
         startActivity(i);
         finish();
     }
@@ -200,7 +211,6 @@ public class ProfileViewActivity extends AppCompatActivity {
     public void optionsButtonClicked(View v) {
         Log.i(TAG, "PVA: optionsButton, going to OptionsActivity");
         Intent i = new Intent(this, OptionsActivity.class);
-//        m_ProfileImage.setImageBitmap(null);
         startActivity(i);
         finish();
     }
@@ -220,12 +230,6 @@ public class ProfileViewActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        Drawable drawable = m_ProfileImage.getDrawable();
-//        if (drawable instanceof BitmapDrawable) {
-//            BitmapDrawable bd = (BitmapDrawable) drawable;
-//            Bitmap bitmap = bd.getBitmap();
-//            bitmap.recycle();
-//        }
     }
 
     @Override
@@ -265,7 +269,8 @@ public class ProfileViewActivity extends AppCompatActivity {
             Bitmap profile = m_ProfileImage.getDrawingCache();
             i.putExtra("profile_image", profile);
             i.putExtra("cameFromProfileView", true);
-            m_ProfileImage.setImageBitmap(null);
+            TextView email = (TextView) findViewById(R.id.view_contact_email);
+            i.putExtra("email", email.getText().toString());
             startActivity(i);
             return true;
         }

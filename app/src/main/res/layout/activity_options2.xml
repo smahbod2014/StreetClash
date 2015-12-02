@@ -133,6 +133,7 @@
             android:spinnerMode="dropdown"
             android:entries="@array/filtering_array"
             android:layout_marginTop="20dp"
+            android:background="#FFFFFF"
             android:textColor="#FFFFFF"/>
 
     </RelativeLayout>

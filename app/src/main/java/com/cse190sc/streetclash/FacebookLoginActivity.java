@@ -39,6 +39,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.cse190sc.streetclash.R;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -60,6 +62,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import io.fabric.sdk.android.Fabric;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -109,6 +113,7 @@ public class FacebookLoginActivity extends AppCompatActivity
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_facebook_login);
 
+        Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
 
         /**********************************************************************
          * 1. Initialize FacebookSDK
@@ -166,7 +171,7 @@ public class FacebookLoginActivity extends AppCompatActivity
                                                         (BeaconTransmitterApplication) FacebookLoginActivity.this.getApplicationContext();
                                                 app.setBeaconIdentifier(userID);
 
-                                                Log.i("StreetClash", "Setting beacon ID to " + userID);
+                                                Log.e("StreetClash", "Setting beacon ID to " + userID);
                                                 if (response.has("newUser")) {
                                                     //we are a new user
                                                     Log.i("StreetClash", "Facebook: New user!");
@@ -563,6 +568,10 @@ public class FacebookLoginActivity extends AppCompatActivity
     public void proceedToAppClicked(View v) {
         SharedPreferences prefs = getSharedPreferences("com.cse190sc.streetclash", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("newUser", false).apply();
+        BeaconTransmitterApplication app =
+                (BeaconTransmitterApplication) FacebookLoginActivity.this.getApplicationContext();
+        app.setBeaconIdentifier(prefs.getString("userID", "1"));
+        Log.e("StreetClash", "Proceeding to app using " + prefs.getString("userID", "1") + " as our userID");
         Intent i = new Intent(getApplicationContext(), ProfileListActivity.class);
         startActivity(i);
         finish();

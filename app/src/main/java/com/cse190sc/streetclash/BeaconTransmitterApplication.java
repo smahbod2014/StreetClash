@@ -37,6 +37,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Random;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Logger;
+import com.google.android.gms.analytics.Tracker;
+
 /**
  * Created by Jono on 11/21/2015.
  */
@@ -163,6 +167,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
     }
 
     private void updateAllEntriesDistance(final String userID, final double distance) {
+        Log.e("BTA", "Updating entry for " + userID);
         JsonObjectRequest req = new JsonObjectRequest(
                 Request.Method.GET,
                 Constants.SERVER_URL + "/users?userID=" + userID,
@@ -299,12 +304,11 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
      * the ProfileListActivity activity will be launched.
      */
     public void createNotification() {
-        int yellow = 0xffffff00;
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
-                        .setContentTitle("StreetClash")
+                        .setContentTitle("StreetMeet")
                         .setContentText("You just found someone!")
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(R.mipmap.streetmeet_icon)
                         .setAutoCancel(true)
                         .setVibrate(new long[] {0, 125, 125, 125})
                         .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS);
@@ -322,16 +326,6 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         NotificationManager notificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, builder.build());
-    }
-
-    public int getNumBeacons() {
-        int size = 0;
-
-        synchronized (m_BeaconMap) {
-            size = m_BeaconMap.size();
-        }
-
-        return size;
     }
 
     public void startScanning() {
@@ -396,6 +390,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
 
             Profile p = s_ProfileListEntries.get(index);
             p.name = name;
+            p.inRange = true;
             p.distance = distance;
 //            if (!p.imageBytes.equals(imageBytes)) {
                 p.imageBytes = imageBytes;
@@ -475,5 +470,20 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         for (Profile p : s_ProfileListEntries) {
             p.imageChanged = true;
         }
+    }
+
+    private Tracker mTracker;
+    /**
+     * Gets the default {@link Tracker} for this {@link Application}.
+     * @return tracker
+     */
+    synchronized public Tracker getDefaultTracker() {
+        if (mTracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
+//            mTracker = analytics.newTracker(R.xml.global_tracker);
+            mTracker = analytics.newTracker("9f84aff748de58167a7c25e377251261da60c343");
+        }
+        return mTracker;
     }
 }
