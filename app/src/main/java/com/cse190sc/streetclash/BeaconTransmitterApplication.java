@@ -112,7 +112,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
         m_Transmitter.setAdvertiseTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM);
         m_Transmitter.setBeacon(new Beacon.Builder()
                 .setId1("2F234454-CF6D-4A0F-ADF2-F4911BA9FFA6")
-                .setId2(String.valueOf(new Random().nextInt(30000)))
+                .setId2("1")
                 .setId3("987")
                 .setManufacturer(0x0000) // Choose a number of 0x00ff or less as some devices cannot detect beacons with a manufacturer code > 0x00ff
                 .setTxPower(-59)
@@ -188,26 +188,29 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                             if (skillsFilterMatch(skills)) {
                                 // notify if this is the first time it's a match
                                 SightingInfo si = m_BeaconMap.get(userID);
-                                if (!si.seen && isAppInBackground()) {
-                                    createNotification();
-                                }
+                                if (si != null) {
+                                    if (!si.seen && isAppInBackground()) {
+                                        createNotification();
+                                    }
 
-                                si.seen = true;
+                                    si.seen = true;
+                                }
                                 updateUserInfo(name, imageBytes, userID, distance);
                             }
                             else {
                                 // Doesn't match the skills, make it look like this person isn't in range
                                 SightingInfo si = m_BeaconMap.get(userID);
-                                if (si.seen) {
-                                    si.seen = false;
-                                    for (int i = 0; i < s_ProfileListEntries.size(); i++) {
-                                        if (s_ProfileListEntries.get(i).userID.equals(userID)) {
-                                            s_ProfileListEntries.get(i).inRange = false;
-                                            notifyChanged();
+                                if (si != null) {
+                                    if (si.seen) {
+                                        si.seen = false;
+                                        for (int i = 0; i < s_ProfileListEntries.size(); i++) {
+                                            if (s_ProfileListEntries.get(i).userID.equals(userID)) {
+                                                s_ProfileListEntries.get(i).inRange = false;
+                                                notifyChanged();
+                                            }
                                         }
                                     }
                                 }
-
                             }
                         }
                         catch (JSONException e) {
@@ -308,7 +311,7 @@ public class BeaconTransmitterApplication extends Application implements Bootstr
                 new NotificationCompat.Builder(this)
                         .setContentTitle("StreetMeet")
                         .setContentText("You just found someone!")
-                        .setSmallIcon(R.mipmap.streetmeet_icon)
+                        .setSmallIcon(R.mipmap.streetmeet_notification)
                         .setAutoCancel(true)
                         .setVibrate(new long[] {0, 125, 125, 125})
                         .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS);

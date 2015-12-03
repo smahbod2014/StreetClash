@@ -27,7 +27,8 @@
             android:layout_marginLeft="-4dp"
             android:src="@mipmap/cse190_passfeedbutton_white"
             android:scaleType="fitCenter"
-            android:backgroundTint="#30425C" />
+            android:backgroundTint="#30425C"
+            android:longClickable="true"/>
 
         <ImageButton
             android:layout_width="135dp"
