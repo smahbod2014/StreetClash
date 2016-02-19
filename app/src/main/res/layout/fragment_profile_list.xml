@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1F2B3C">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/profile_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="444dp"
+        android:layout_weight="4.11" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:weightSum="1"
+        android:layout_weight="0.28"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="-5dp">
+
+        <ImageButton
+            android:layout_width="135dp"
+            android:layout_height="match_parent"
+            android:id="@+id/btn_pass_feed"
+            android:layout_weight="0.26"
+            android:layout_marginLeft="-4dp"
+            android:src="@mipmap/cse190_passfeedbutton_white"
+            android:scaleType="fitCenter"
+            android:backgroundTint="#30425C"
+            android:longClickable="true"/>
+
+        <ImageButton
+            android:layout_width="135dp"
+            android:layout_height="match_parent"
+            android:id="@+id/imageButton"
+            android:layout_weight="0.26"
+            android:layout_marginLeft="-6dp"
+            android:src="@mipmap/cse190_profilebutton_white"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="false"
+            android:onClick="profileButtonClicked"
+            android:backgroundTint="#30425C" />
+
+        <ImageButton
+            android:layout_width="135dp"
+            android:layout_height="match_parent"
+            android:id="@+id/imageButton8"
+            android:layout_marginLeft="-6dp"
+            android:src="@mipmap/cse190_optionsbutton_white"
+            android:scaleType="fitCenter"
+            android:onClick="optionsButtonClicked"
+            android:backgroundTint="#30425C" />
+
+    </LinearLayout>
+</LinearLayout>
